@@ -35,7 +35,7 @@ def home():
     col1, col2, col3 = st.columns(3)
     with col2:
         st.markdown('---')
-        st.title('Quantiq')
+        st.image('QUANTIQ.png')
         st.markdown('---')
         
 #Panorama do Mercado
