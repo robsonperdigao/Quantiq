@@ -210,7 +210,7 @@ def fundamentos():
             st.write('**Dividend Yield:**', f"{info_papel1['Div_Yield'][0]}")
     
     if comparar:
-        with col1:
+        with col2:
             with st.expander('', expanded=True):
                 papel2 = st.selectbox('Selecione o 2º Papel', lista_tickers)
                 info_papel2 = fd.get_detalhes_papel(papel2)
@@ -228,8 +228,8 @@ def fundamentos():
 #Magic Formula
 def magic_formula():
     st.title('Magic Formula')
-    liquidez = st.number_input('Qual a liquidez mínima desejada? (Ideal maior que 1.000.000)', value=1000000, min_value=0, step=100000)
-    qtd_ativos = st.number_input('Quantos ativos você deseja no Ranking Final?', value=15, min_value=0)
+    liquidez = st.slider('Qual a liquidez mínima desejada? (Ideal maior que 1.000.000)', 100000, 5000000, value=1000000, step=100000)
+    qtd_ativos = st.slider('Quantos ativos você deseja no Ranking Final?', 3, 30, value=15)
     botao = st.button('Botão Mágico')
     
     if botao:
@@ -266,6 +266,9 @@ def magic_formula():
             st.write(ranking)
     
 def main():
+    st.set_page_config(page_title='Robson Perdigão - Quantiq Finanças Quantitativas',
+                       page_icon='📈',
+                       initial_sidebar_state='expanded')
     st.sidebar.image('QUANTIQ.png')
     st.sidebar.markdown('---')
     lista_menu = ['Home', 'Panorama do Mercado', 'Rentabilidades Mensais', 'Fundamentos', 'Magic Formula']
