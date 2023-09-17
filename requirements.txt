@@ -8,3 +8,5 @@ seaborn
 plotly
 fundamentus
 requests
+numpy_financial
+datetime
