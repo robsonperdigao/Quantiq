@@ -10,7 +10,7 @@ def main():
     col1, col2, col3, col4 = st.columns(4)
     st.markdown('---')
     with col1:
-        st.image('QUANTIQ.png')
+        st.image('foto_perfil.png')
 
     with col2:
         st.markdown('# Robson Perdigão')
