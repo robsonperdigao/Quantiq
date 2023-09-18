@@ -25,7 +25,9 @@ def lista_empresas():
 
     return list(df['Papel'])
 
-st.set_page_config(page_title='Panorama de Mercado', page_icon='📰')
+st.set_page_config(page_title='Panorama de Mercado', 
+                   page_icon='📰',
+                   layout='wide')
 st.title('Panorama do Mercado')
 st.markdown(date.today().strftime('%d/%m/%Y'))
 

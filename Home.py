@@ -3,7 +3,8 @@ import streamlit as st
 def main():
     st.set_page_config(page_title='Robson Perdigão - Quantiq Finanças Quantitativas',
                        page_icon='📈',
-                       initial_sidebar_state='expanded')
+                       initial_sidebar_state='expanded',
+                       layout='wide')
     st.sidebar.image('QUANTIQ.png')
     st.sidebar.markdown('---')
     
@@ -19,6 +20,6 @@ def main():
     st.write("""Me chamo Robson Perdigão, sou Assessor de Investimentos na InvestSmart.
                  Investidor desde 2012, trader desde 2018 e Assessor desde 2020.
                  2023 foi o ano para entrar no mundo das Finanças Quantitativas com o objetivo de melhorar a performance dos meus investimentos e auxiliar os investidores a tomar melhores decisões.""")
-    st.write('Escolha a opção no menu ao lado')
+    st.write('< Escolha a opção no menu ao lado')
    
 main()

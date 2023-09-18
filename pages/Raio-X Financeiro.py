@@ -2,10 +2,13 @@ import streamlit as st
 from datetime import date
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.express as px
 import numpy as np
 import numpy_financial as npf
 
-st.set_page_config(page_title='Contexto de Vida e Diagnóstico', page_icon='📊')
+st.set_page_config(page_title='Contexto de Vida e Diagnóstico', 
+                   page_icon='📊',
+                   layout='wide')
 st.title('Contexto de Vida')
 st.sidebar.header('Diagnóstico')
 st.write(
@@ -63,7 +66,7 @@ if estado_civil == 'Casado(a) / União Estável':
         regime_casamento = st.selectbox('Regime de Casamento', lista_regime)
     st.markdown('---')
     
-filhos = st.radio('Possui Filhos?', ['Sim', 'Não'], horizontal=True)
+filhos = st.radio('Possui Filhos?', ['Não', 'Sim'], horizontal=True, )
 if filhos == 'Sim':
     col1, col2, col3, col4 = st.columns(4)
     with col1:
@@ -128,8 +131,8 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     cap_poupanca = receita_total - despesa_mensal
     cap_poupanca_anual = cap_poupanca * 12
-    st.write('Sua capacidade de poupança é de R$', str(cap_poupanca), 'mensais')
-    st.write('Sua capacidade de poupança é de R$', str(cap_poupanca_anual), 'anuais')
+st.write('Sua capacidade de poupança é de R$', str(cap_poupanca), 'mensais')
+st.write('Sua capacidade de poupança é de R$', str(cap_poupanca_anual), 'anuais')
 
 st.markdown('---')
 
@@ -147,20 +150,30 @@ with col1:
     idade_indep = st.slider('Idade da Independência Financeira', min_value=18, max_value=100, value=50, step=1)
     anos_indep = idade_indep - idade_cliente
     st.write(anos_indep)
-    juro_real = st.number_input('Taxa de Juros Real', value=4.0, step=0.5) / 100
     
-
 with col2:
     renda_indep = st.number_input('Renda Mensal Desejada')
     
+with col3:
+    juro_real = st.number_input('Taxa de Juros Real', value=4.0, step=0.5) / 100
+    juro_mensal = (1+juro_real)**(1/12)-1
     
-st.markdown('---')
-
-st.markdown('### Diagnóstico de Independência Financeira')
 patrim_indep = npf.fv(juro_real, anos_indep, -cap_poupanca_anual, 0).round(2)
-st.write('Potrimônio na Independência Financeira: R$', str(patrim_indep))
+tempo_consumo = round(float(npf.nper(juro_mensal, renda_indep, -patrim_indep)),0)
+renda_perpetua = round(renda_indep / juro_mensal, 2)
+meses_consumo = (100 - idade_indep) * 12
+renda_consumo = npf.pv(juro_mensal, meses_consumo, -renda_indep).round(2)
+st.write(patrim_indep)
+st.write(tempo_consumo)
+st.write(renda_perpetua)
 
-df = pd.DataFrame(columns=['Valor Investido', 'Patrimônio'], index=['Ano'])
+evo_anual = list(range(1, anos_indep+1))
+df = pd.DataFrame(columns=['Valor Investido', 'Patrimônio'], index=evo_anual)
+for i in evo_anual:
+    valor_investido = npf.fv(0, evo_anual, -cap_poupanca_anual, 0).round(2)
+    patrimonio = npf.fv(juro_real, evo_anual, -cap_poupanca_anual, 0).round(2)
+    df['Valor Investido'] = valor_investido
+    df['Patrimônio'] = patrimonio
 
 tab1, tab2 = st.tabs(["📈 Gráfico", "🗃 Dados"])
 tab1.subheader("Evolução Patrimonial")
@@ -168,6 +181,88 @@ tab1.line_chart(df)
 
 tab2.subheader("Dados Detalhados")
 tab2.write(df)
+col1, col2, col3 = st.columns(3)  
+with col1:
+    st.success(f'Projeção de patrimônio: R$ {patrim_indep:.2f}')
+    
+with col2:
+    st.success(f'Capital necessário para consumo até os 100 anos: R$ {renda_consumo:.2f}')
+    
+with col3:
+    st.success(f'Capital necessário para renda vitalícia: R$ {renda_perpetua:.2f}')
 
 st.markdown('---')
 
+cenario2 = st.toggle('Simular outro cenário')
+if cenario2:
+    st.markdown('### Cenário 2')
+    col1, col2, col3, col4 = st.columns(4)  
+    with col1:
+        idade_indep_2 = st.slider('Idade da Independência Financeira', min_value=18, max_value=100, value=60, step=1)
+        anos_indep_2 = idade_indep_2 - idade_cliente
+        st.write(anos_indep_2)  
+
+    with col2:
+        renda_indep_2 = st.number_input('Renda Mensal Desejada', key='RendaIndep2')
+
+    with col3:
+        juro_real_2 = st.number_input('Taxa de Juros Real', value=5.0, step=0.5) / 100
+        
+    with col4:
+        cap_poupanca_anual_2 = st.number_input('Capacidade de Poupança Anual')
+    
+    evo_anual_2 = list(range(1, anos_indep_2+1))
+    df = pd.DataFrame(columns=['Valor Investido', 'Patrimônio'], index=evo_anual_2)
+    for i in evo_anual_2:
+        valor_investido = npf.fv(0, evo_anual_2, -cap_poupanca_anual_2, 0).round(2)
+        patrimonio = npf.fv(juro_real_2, evo_anual_2, -cap_poupanca_anual_2, 0).round(2)
+        df['Valor Investido'] = valor_investido
+        df['Patrimônio'] = patrimonio
+         
+    patrim_indep_2 = npf.fv(juro_real_2, anos_indep_2, -cap_poupanca_anual_2, 0).round(2)  
+    
+    tab1, tab2 = st.tabs(["📈 Gráfico", "🗃 Dados"])
+    
+    with tab1:
+        st.subheader("Evolução Patrimonial")
+        st.line_chart(df)
+    
+    with tab2:
+        st.subheader("Dados Detalhados")
+        st.write(df)
+
+    col1, col2, col3 = st.columns(3)  
+    with col1:
+        st.success(f'Projeção de patrimônio: R$ {patrim_indep}')
+        
+    with col2:
+        st.success(f'Capital necessário para consumo até os 100 anos: R$ {patrim_indep}')
+        
+    with col3:
+        st.success(f'Capital necessário para renda vitalícia: R$ {patrim_indep}')
+
+st.markdown('---')
+
+st.write('### Receitas')
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.write('Receitas x Despesas')
+    plt.style.use('_mpl-gallery-nogrid')
+    x = [receita_mensal, outras_receitas, receita_conjuge]
+    colors = plt.get_cmap('Blues')(np.linspace(0.2, 0.7, len(x)))
+    fig, ax = plt.subplots()
+    ax.pie(x, colors=colors, radius=3, center=(4, 4),
+        wedgeprops={"linewidth": 1, "edgecolor": "white"}, frame=False, labels=x)
+    st.pyplot(fig)
+      
+with col3:
+    st.write('Distribuição das Receitas')
+    plt.style.use('_mpl-gallery-nogrid') 
+    x = [receita_total, despesa_mensal, cap_poupanca]
+    colors = plt.get_cmap('Blues')(np.linspace(0.2, 0.7, len(x)))
+    fig, ax = plt.subplots()
+    ax.pie(x, colors=colors, radius=3, center=(4, 4),
+        wedgeprops={"linewidth": 1, "edgecolor": "white"}, frame=False, labels=x)
+    
+    st.pyplot(fig)
+st.markdown('---')

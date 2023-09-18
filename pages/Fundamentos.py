@@ -1,7 +1,9 @@
 import streamlit as st
 import fundamentus as fd
 
-st.set_page_config(page_title='Análise Fundamentalista', page_icon='📊')
+st.set_page_config(page_title='Análise Fundamentalista', 
+                   page_icon='📊',
+                   layout='wide')
 st.title('Análise Fundamentalista')
     
 lista_tickers = fd.list_papel_all()

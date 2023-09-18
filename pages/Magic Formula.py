@@ -2,7 +2,9 @@ import streamlit as st
 import requests
 import pandas as pd
 
-st.set_page_config(page_title='Magic Formula', page_icon='🎯')
+st.set_page_config(page_title='Magic Formula', 
+                   page_icon='🎯',
+                   layout='wide')
 st.title('Magic Formula')
 
 liquidez = st.slider('Qual a liquidez mínima desejada? (Ideal maior que 1.000.000)', 100000, 5000000, value=1000000, step=100000)

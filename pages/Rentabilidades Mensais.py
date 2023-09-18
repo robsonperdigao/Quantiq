@@ -27,7 +27,9 @@ def lista_empresas():
 
     return list(df['Papel'])
 
-st.set_page_config(page_title='Mapa de Retornos Mensais', page_icon='📈')
+st.set_page_config(page_title='Mapa de Retornos Mensais', 
+                   page_icon='📈',
+                   layout='wide')
 st.title('Mapa de Retornos Mensais')
     
 opcao = st.radio('Selecione', ['Índices', 'Ações'])
