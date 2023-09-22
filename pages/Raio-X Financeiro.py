@@ -13,7 +13,6 @@ st.set_page_config(page_title='Raio-X Financeiro',
                    layout='wide')
 st.title('Raio-X Financeiro')
 
-
 st.write("""Um bom planejamento financeiro oferece uma abordagem abrangente para ajudar você a atingir seus objetivos no curto, médio e longo prazo. Nesta página você poderá inserir informações sobre suas finanças pessoais, incluindo receitas, despesas, investimentos atuais e seus planos de aposentadoria desejados, e automaticamente será realizada uma projeção precisa da sua situação financeira.
 Usando algoritmos avançados, é calculada sua capacidade de poupança e projetado como seu patrimônio evoluirá ao longo do tempo. Isso é apresentado de forma visual em gráficos fáceis de entender, permitindo que você visualize seu caminho financeiro. Além disso, é possível visualizar a evolução do seu patrimônio após a aposentadoria, seja mantendo um patrimônio que gera renda vitalícia ou usando-o até os 100 anos.
 Futuramente será incluída a funcionalidade de Asset Alocation, que é basicamente como sua carteira fica melhor distribuída de acordo com o seu perfil e objetivos, ajudando a maximizar seu potencial de retorno e minimizar riscos.
@@ -43,7 +42,7 @@ def calcula_patrimonio(idade, idade_indep, patrim_atual, cap_poup_ano, renda_men
     patrim_acumulado = npf.fv(tx_juro_ano, anos_invest, -cap_poup_ano, -patrim_atual).round(2)
     tempo_consumo_meses = round(float(npf.nper(juro_mensal, renda_mensal_indep, -patrim_acumulado)),0)
     pat_vitalicio = round(renda_mensal_indep / juro_mensal, 2)
-    parcela_vitalicio = npf.pmt(juro_mensal, meses_invest, 0, -pat_vitalicio).round(2)
+    parcela_vitalicio = npf.pmt(juro_mensal, meses_invest, -patrim_atual, -pat_vitalicio).round(2)
     pat_consumo = npf.pv(juro_mensal, meses_consumo, -renda_mensal_indep, 0).round(2)
     parcela_consumo = npf.pmt(juro_mensal, meses_invest, 0, -pat_consumo).round(2)
     patrim_consumo = npf.fv(tx_juro_ano, anos_invest, -parcela_consumo * 12, -patrim_atual)
@@ -53,10 +52,10 @@ def calcula_patrimonio(idade, idade_indep, patrim_atual, cap_poup_ano, renda_men
                                         'Vitalício', 'Consumo Patrimônio'], 
                                 index=evo_ano)
     for i in evo_ano:
-        valor_investido_ano = npf.fv(0, evo_ano, -cap_poup_ano, patrim_atual).round(2)
-        patrimonio = npf.fv(tx_juro_ano, evo_ano, -cap_poup_ano, patrim_atual).round(2)
-        vitalicio = npf.fv(tx_juro_ano, evo_ano, -parcela_vitalicio * 12, patrim_atual).round(2)
-        consumo = npf.fv(tx_juro_ano, evo_ano, -parcela_consumo * 12, patrim_atual).round(2)
+        valor_investido_ano = npf.fv(0, evo_ano, -cap_poup_ano, -patrim_atual).round(2)
+        patrimonio = npf.fv(tx_juro_ano, evo_ano, -cap_poup_ano, -patrim_atual).round(2)
+        vitalicio = npf.fv(tx_juro_ano, evo_ano, -parcela_vitalicio * 12, -patrim_atual).round(2)
+        consumo = npf.fv(tx_juro_ano, evo_ano, -parcela_consumo * 12, -patrim_atual).round(2)
         df['Idade'].loc[i] = idade + i
         df['Valor Investido'] = valor_investido_ano
         df['Patrimônio Acumulado'] = patrimonio
@@ -68,13 +67,15 @@ def calcula_patrimonio(idade, idade_indep, patrim_atual, cap_poup_ano, renda_men
 def calcula_independencia(idade, idade_indep, patrim_atual, cap_poup_ano, renda_mensal_indep, tx_juro_ano):
     anos_invest = idade_indep - idade
     anos_consumo = 100 - idade_indep
+    meses_invest = anos_invest * 12
     juro_mensal = (1+tx_juro_ano)**(1/12)-1
     renda_indep_anual = renda_mensal_indep * 12
     evo_ano_indep = list(range(idade_indep, 101))
     tempo_uso = list(range(0, anos_consumo + 1))
-    tempo_consumo = list(range(idade_indep, -1, -1))
+    tempo_consumo = list(range(anos_consumo, -1, -1))
+    pat_vitalicio = round(renda_mensal_indep / juro_mensal, 2)
     valor_inv = npf.fv(0, anos_invest, -cap_poup_ano, -patrim_atual).round(2)
-    parcela_vitalicio = npf.pmt(juro_mensal, meses_invest, 0, -pat_vitalicio).round(2)
+    parcela_vitalicio = npf.pmt(juro_mensal, meses_invest, -patrim_atual, -pat_vitalicio).round(2)
     patrim_vitalicio = npf.fv(tx_juro_ano, anos_invest, -parcela_vitalicio * 12, -patrim_atual).round(2)
     patrim_acumulado = npf.fv(tx_juro_ano, anos_invest, -cap_poup_ano, -patrim_atual).round(2)
     df = pd.DataFrame({'Idade': evo_ano_indep,
@@ -420,10 +421,11 @@ if cenario2:
 
     with col2:
         renda_indep_2 = st.number_input('Renda Mensal Desejada', key='RendaIndep2')
-
+        renda_indep_anual_2 = renda_indep_2 * 12
+        
     with col3:
         juro_real_2 = st.number_input('Taxa de Juros Real', value=5.0, step=0.5) / 100
-        juro_mensal_2 = (1+juro_real)**(1/12)-1
+        juro_mensal_2 = (1+juro_real_2)**(1/12)-1
         
     with col4:
         cap_poupanca_anual_2 = st.number_input('Capacidade de Poupança Anual')
