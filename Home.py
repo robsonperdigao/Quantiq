@@ -17,6 +17,7 @@ def main():
         st.markdown('# Robson Perdigão')
         st.markdown('## Assessor de Investimentos')
         st.write('InvestSmart')
+        st.write(" LinkedIn: [@robsonperdigao]('https://www.linkedin.com/in/robsonperdigao/')")
     st.write("""Me chamo Robson Perdigão, sou Assessor de Investimentos na InvestSmart.
                  Investidor desde 2012, trader desde 2018 e Assessor desde 2020.
                  2023 foi o ano para entrar no mundo das Finanças Quantitativas com o objetivo de melhorar a performance dos meus investimentos e auxiliar os investidores a tomar melhores decisões.""")
