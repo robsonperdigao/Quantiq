@@ -52,14 +52,22 @@ if analisar:
     if opcao == 'Índices':
         if ticker == 'IBOV':
             retornos = yf.download('^BVSP', start = data_inicial, end = data_final, interval = '1mo')['Close'].pct_change()
+            cotacao = yf.download('^BVSP', start = data_inicial, end = data_final)['Close'].round(2)
         if ticker == 'Dólar':
             retornos = yf.download('USDBRL=X', start = data_inicial, end = data_final, interval = '1mo')['Close'].pct_change()
+            cotacao = yf.download('USDBRL=X', start = data_inicial, end = data_final)['Close'].round(2)
         if ticker == 'S&P500':
             retornos = yf.download('^GSPC', start = data_inicial, end = data_final, interval = '1mo')['Close'].pct_change()
+            cotacao = yf.download('^GSPC', start = data_inicial, end = data_final)['Close'].round(2)
         if ticker == 'NASDAQ':
             retornos = yf.download('^IXIC', start = data_inicial, end = data_final, interval = '1mo')['Close'].pct_change()
-    else:
+            cotacao = yf.download('^IXIC', start = data_inicial, end = data_final)['Close'].round(2)
+    else:   
         retornos = yf.download(ticker, start = data_inicial, end = data_final, interval = '1mo')['Close'].pct_change()
+        cotacao = yf.download(ticker, start = data_inicial, end = data_final)['Close'].round(2)
+    
+    #Gráfico
+    st.line_chart(cotacao)
     
     #Matriz de retornos
     retorno_mensal = retornos.groupby([retornos.index.year.rename('Year'), retornos.index.month.rename('Month')]).mean()
@@ -106,3 +114,4 @@ if analisar:
                 cbar = False, linewidths = 1, xticklabels = True, yticklabels = True, ax = ax)
     ax.set_yticklabels(ax.get_yticklabels(), rotation = 0, verticalalignment = 'center', fontsize = '12')
     st.pyplot(fig)
+    

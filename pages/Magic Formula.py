@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import pandas as pd
+import fundamentus as fd
 
 st.set_page_config(page_title='Magic Formula', 
                    page_icon='🎯',
@@ -53,4 +54,35 @@ if botao:
         ranking = tabela.index
         ranking = '\n'.join(f'{i+1}. {acao}' for i, acao in enumerate(ranking))
         st.markdown('**Ranking final da Magic Formula:**')
-        st.write(ranking)
+        
+        
+        def dados_ativo(papel):
+            info_papel = fd.get_detalhes_papel(papel)
+            st.write('**Empresa:**', info_papel['Empresa'][0])
+            st.write('**Setor:**', info_papel['Setor'][0])
+            st.write('**Segmento:**', info_papel['Subsetor'][0])
+            st.markdown('---')
+            st.write('**Cotação:**', f"R$ {float(info_papel['Cotacao'][0]):,.2f}")
+            st.write('**Data Última Cotação:**', info_papel['Data_ult_cot'][0])
+            st.write('**Liquidez Média 2 Meses:**', info_papel['Vol_med_2m'][0])
+            st.write('**EV/EBITDA:**', f"{float(info_papel['EV_EBITDA'][0])/100:,.2f}")
+            st.write('**ROIC:**', info_papel['ROIC'][0])
+            st.write('**Valor de Mercado:**', f"R$ {float(info_papel['Valor_de_mercado'][0]):,.2f}")
+            st.write('**Patrimônio Líquido:**', f"R$ {float(info_papel['Patrim_Liq'][0]):,.2f}")
+            st.write('**Receita Líquida 12m:**', f"R$ {float(info_papel['Receita_Liquida_12m'][0]):,.2f}")
+            st.write('**Lucro Líquido 12m:**', f"R$ {float(info_papel['Lucro_Liquido_12m'][0]):,.2f}")
+            st.write('**Dívida Bruta:**', f"R$ {float(info_papel['Div_Bruta'][0]):,.2f}")
+            st.write('**Dívida Líquida:**', f"R$ {float(info_papel['Div_Liquida'][0]):,.2f}")
+            st.write('**P/L:**', f"{float(info_papel['PL'][0])/100:,.2f}")
+            st.write('**P/VP:**', f"{float(info_papel['PVP'][0])/100:,.2f}")
+            st.write('**Dividend Yield:**', info_papel['Div_Yield'][0])   
+            st.write('**Margem Bruta:**', info_papel['Marg_Bruta'][0])  
+            st.write('**Margem Líquida:**', info_papel['Marg_Liquida'][0]) 
+            st.markdown('---') 
+            st.write('**Último Balanço Processado:**', info_papel['Ult_balanco_processado'][0]) 
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            for acao in tabela.index:
+                with st.expander(acao, expanded=False):
+                    dados_ativo(acao)

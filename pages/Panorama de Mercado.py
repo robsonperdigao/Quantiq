@@ -31,7 +31,7 @@ st.set_page_config(page_title='Panorama de Mercado',
 st.title('Panorama do Mercado')
 st.markdown(date.today().strftime('%d/%m/%Y'))
 
-#Mercaod pelo mundo
+#Mercados pelo mundo
 st.subheader('Mercados pelo Mundo')
 
 dict_tickers = {'Bovespa': '^BVSP',

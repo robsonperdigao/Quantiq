@@ -5,8 +5,7 @@ def main():
                        page_icon='📈',
                        initial_sidebar_state='expanded',
                        layout='wide')
-    st.sidebar.image('QUANTIQ.png')
-    st.sidebar.markdown('---')
+
     
     col1, col2, col3, col4 = st.columns(4)
     st.markdown('---')
@@ -16,7 +15,7 @@ def main():
     with col2:
         st.markdown('# Robson Perdigão')
         st.markdown('## Assessor de Investimentos')
-        st.write('InvestSmart')
+        st.write("[InvestSmart](https://investsmart.com.br/robson-perdigao/)")
         st.write(" LinkedIn: [@robsonperdigao]('https://www.linkedin.com/in/robsonperdigao/')")
     st.write("""Me chamo Robson Perdigão, sou Assessor de Investimentos na InvestSmart.
                  Investidor desde 2012, trader desde 2018 e Assessor desde 2020.
