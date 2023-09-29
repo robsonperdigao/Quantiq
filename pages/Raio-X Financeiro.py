@@ -20,6 +20,7 @@ Através desse raio-X financeiro você terá uma visão clara e estratégica de 
 
 Preencha as informações abaixo:""")
 
+@st.cache_data
 def calcula_idade(nascimento): 
     today = date.today() 
     try:  
@@ -33,7 +34,8 @@ def calcula_idade(nascimento):
         return today.year - nascimento.year - 1
     else: 
         return today.year - nascimento.year 
-
+    
+@st.cache_data
 def calcula_patrimonio(idade, idade_indep, patrim_atual, cap_poup_ano, renda_mensal_indep, tx_juro_ano): 
     anos_invest = idade_indep - idade
     meses_invest = anos_invest * 12
@@ -64,6 +66,7 @@ def calcula_patrimonio(idade, idade_indep, patrim_atual, cap_poup_ano, renda_men
     df = df.set_index('Idade')
     return df
 
+@st.cache_data
 def calcula_independencia(idade, idade_indep, patrim_atual, cap_poup_ano, renda_mensal_indep, tx_juro_ano):
     anos_invest = idade_indep - idade
     anos_consumo = 100 - idade_indep
@@ -99,6 +102,7 @@ def calcula_independencia(idade, idade_indep, patrim_atual, cap_poup_ano, renda_
     df = df.set_index('Idade')
     return df
 
+@st.cache_data
 def lista_empresas():
     """
     Papel: Get list of tickers
@@ -119,6 +123,7 @@ def lista_empresas():
 
     return list(df['Papel'])
 
+@st.cache_data(experimental_allow_widgets=True)
 def categoria_invest(categoria, key): 
         lista_acoes =  [i + '.SA' for i in lista_empresas()]     
         match categoria:
@@ -505,7 +510,41 @@ if receita_mensal > 0 and despesa_mensal > 0:
         st.pyplot(fig)
     st.markdown('---')
 
+if patrim_acumulado > 0:
+    st.write('### Gerenciamento de Risco')
+    col1, col2, col3, col4 = st.columns(4)
+    
+    
+    st.markdown('---')
+    
+    
+    st.write('### Inventário')
+    col1, col2, col3, col4 = st.columns(4)
+    
+    
+    st.markdown('---')
+    
+    
+    st.write('### Despesas')
+    col1, col2, col3, col4 = st.columns(4)
+    
+    
+    st.markdown('---')
 
+
+    if filhos == 'Sim':    
+        st.write('### Proteção de Educação')
+        col1, col2, col3, col4 = st.columns(4)
+        
+        
+        st.markdown('---')
+    
+    
+    st.write('### Consolidação')
+    col1, col2, col3, col4 = st.columns(4)
+    
+    
+    st.markdown('---')
 
 
 
@@ -523,6 +562,6 @@ if idade_cliente > 0:
         st.sidebar.write(nome_filho4)
     st.sidebar.write(f'Receita mensal familiar de R$ {receita_total:.2f}')
     st.sidebar.write(f'Despesa mensal familiar de R$ {despesa_mensal:.2f}')
-    st.sidebar.write(f'Capacidade poupança mensal de R$ {cap_poupanca:.2f}')
+    st.sidebar.write(f'Cap. poupança mensal de R$ {cap_poupanca:.2f}')
     st.sidebar.write(f'Investimentos atuais R$ {invest_atual:.2f}')
     st.sidebar.write(f'Valores em bens atuais R$ {bens_atual:.2f}')
