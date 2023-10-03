@@ -13,4 +13,4 @@ datetime
 io
 reportlab
 fpdf
-st_pages
+st-pages
