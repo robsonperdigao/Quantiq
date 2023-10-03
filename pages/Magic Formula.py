@@ -100,8 +100,8 @@ st.write("""Em 'The Little Book That Beats the Market' (A Fórmula Mágica de Jo
 st.write("""O autor também enfatiza a importância de manter uma perspectiva de longo prazo. Ele destaca que, embora a estratégia possa não funcionar bem a cada trimestre ou ano, ao longo de vários anos, ela tende a superar o mercado de forma impressionante. Greenblatt sustenta essa afirmação ao fornecer uma série de exemplos históricos de sucesso da fórmula mágica.
          No entanto, ele também faz questão de alertar que nenhum método de investimento é infalível e que os investidores ainda enfrentam riscos. A estratégia de Greenblatt não se concentra na diversificação, o que significa que os investidores podem estar expostos a riscos específicos de empresas individuais.
          Em resumo, 'The Little Book That Beats the Market' oferece uma abordagem clara e acessível para investir com sabedoria, baseada na seleção de ações de empresas de qualidade a preços atrativos. É uma estratégia que se baseia em princípios sólidos, mas que requer disciplina e paciência para ser eficaz a longo prazo. O livro é uma leitura valiosa para investidores interessados em uma abordagem diferente e potencialmente lucrativa para o mercado de ações.""")
-st.write("""Eu fiz questão de adaptar a Fórmula Mágica para o mercado brasileiro e deixar de forma ainda mais simples a obtenção das ações de acordo com os critérios do livro.
-         Lembrando que os ativos aqui listados não são recomendação de invesitmentos.""")
+st.write('Eu fiz questão de adaptar a Fórmula Mágica para o mercado brasileiro e deixar de forma ainda mais simples a obtenção das ações de acordo com os critérios do livro.')
+st.write('***Lembrando que os ativos aqui listados não são recomendação de investimentos.***')
 st.write("""Altere os critérios abaixo conforme sua vontade, os valores padrões já consideram o recomendado no livro.""")
 
 liquidez = st.slider('Qual a liquidez mínima desejada? (Ideal maior que 1.000.000)', 100000, 5000000, value=1000000, step=100000)

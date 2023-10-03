@@ -87,7 +87,7 @@ fig.update_layout(title = indice, xaxis_rangeslider_visible = False)
 st.plotly_chart(fig) 
 
 lista_acoes =  [i + '.SA' for i in lista_empresas()]
-acao = st.selectbox('Selecione', lista_acoes, index = 333)
+acao = st.selectbox('Selecione', lista_acoes, index = 33)
 hist_acao = yf.download(acao, period = '1mo', interval = '1d', auto_adjust=True)
 
 fig = go.Figure(data=[go.Candlestick(x = hist_acao.index,
