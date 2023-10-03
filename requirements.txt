@@ -10,3 +10,6 @@ fundamentus
 requests
 numpy_financial
 datetime
+io
+reportlab
+fpdf

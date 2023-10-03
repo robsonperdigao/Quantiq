@@ -7,6 +7,15 @@ import numpy as np
 import numpy_financial as npf
 import requests
 import yfinance as yf
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+from reportlab.platypus.tables import Table, TableStyle
+from reportlab.lib.styles import getSampleStyleSheet
+from matplotlib.ticker import FuncFormatter
+from fpdf import FPDF
+from io import BytesIO
+import tempfile
 
 st.set_page_config(page_title='Raio-X Financeiro', 
                    page_icon='📊',
@@ -102,6 +111,25 @@ def calcula_independencia(idade, idade_indep, patrim_atual, cap_poup_ano, renda_
     df = df.set_index('Idade')
     return df
 
+def calcula_gerenc_risco(patrimonio, saque_anual, tx_juros):
+    anos = round(float(npf.nper(tx_juros, -saque_anual, patrimonio, 0)))
+    anos_lista = list(range(1, anos + 1))
+    patrimonio_lista = []
+    saque_lista = []
+    
+    for ano in anos_lista:
+        patrimonio *= (1 + tx_juros)
+        patrimonio -= saque_anual
+        patrimonio_lista.append(round(patrimonio, 2))
+        saque_lista.append(round(saque_anual, 2))
+    
+    df = pd.DataFrame({
+        'Ano': anos_lista,
+        'Patrimônio': patrimonio_lista,
+        })
+    df = df.set_index('Ano')
+    return df, anos
+
 @st.cache_data
 def lista_empresas():
     """
@@ -145,8 +173,136 @@ def categoria_invest(categoria, key):
                 carteira_moeda = st.text_input('Digite a(s) moeda(s)', key=f'moeda{key}')
             case 'Cripto':
                 carteira_cripto = st.text_input('Digite o(s) ativo(s)', key=f'cripto{key}')
+            case 'ETFs':
+                carteira_etf = st.text_input('Digite o(s) ativo(s)', key=f'etf{key}')
+            case 'Stocks':
+                carteira_stocks = st.text_input('Digite o(s) ativo(s)', key=f'stocks{key}')
+            case 'REITs':
+                carteira_reits = st.text_input('Digite o(s) ativo(s)', key=f'reits{key}')
+            case 'Bonds':
+                carteira_bonds = st.text_input('Digite o(s) ativo(s)', key=f'bonds{key}')
+            case 'Treasures':
+                carteira_treasures = st.text_input('Digite o(s) ativo(s)', key=f'treasures{key}')
+            case 'Funds':
+                carteira_funds = st.text_input('Digite o(s) ativo(s)', key=f'funds{key}')
+            case 'Mutual Funds':
+                carteira_mutual_funds = st.text_input('Digite o(s) ativo(s)', key=f'mutual_funds{key}')
         return
 
+class PDFWithFooter(FPDF):
+    def header(self):
+        self.image('logo_investsmart.png', x=65, y=5, w=84, h=22)
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Helvetica', 'I',size=9)
+        self.cell(0, 4, 'robson.perdigao@investsmart.com.br     |     11 98047-3370     |     www.investsmart.com.br', align='L')
+
+def gerar_pdf(grafico_receita, grafico_receita_despesa, grafico_patrimonio, grafico_geren_risco, grafico_consol):
+    pdf = PDFWithFooter()
+    
+    mes = date.today().strftime('%B')
+    ano = date.today().strftime('%Y')
+    meses = {
+        'January': 'Janeiro',
+        'February': 'Fevereiro',
+        'March': 'Março',
+        'April': 'Abril',
+        'May': 'Maio',
+        'June': 'Junho',
+        'July': 'Julho',
+        'August': 'Agosto',
+        'September': 'Setembro',
+        'October': 'Outubro',
+        'November': 'Novembro',
+        'December': 'Dezembro'} 
+    mes_em_portugues = meses.get(mes, mes)
+  
+    # Capa
+    pdf.add_page()
+    pdf.set_font('Helvetica', 'B', size=18)
+    pdf.set_title('Diagnóstico do Cliente')
+    pdf.multi_cell(0, 100, ' ', align='C')
+    pdf.multi_cell(0, 9, f"Diagnóstico do Cliente\n{nome_cliente}", align='C')
+    pdf.multi_cell(0, 18, ' ', align='C')
+    pdf.set_font('Helvetica', size=14)
+    pdf.multi_cell(0, 9, f"Assessor de Investimentos\nRobson Perdigão Assessor", align='C')
+    pdf.multi_cell(0, 100, ' ', align='C')
+    pdf.multi_cell(0, 9, f'{mes_em_portugues}/{ano}', align='C')
+    
+    # Página 1
+    pdf.add_page()
+    pdf.set_font('Helvetica', 'B', size=18)
+    pdf.multi_cell(0, 20, ' ', align='C')
+    pdf.multi_cell(0, 9, '\nAssessoria de Investimentos\n\n', align='L')
+    pdf.set_font('Helvetica', 'B', size=12)
+    pdf.multi_cell(0, 9, f"{nome_cliente},", align='L')
+    pdf.set_font('Helvetica', size=12)
+    pdf.multi_cell(0, 9, f"Esse estudo foi desenvolvido exclusivamente para você.\n\nConsiderei sua capacidade de poupança para atingir seus objetivos de curto, médio e longo prazo, adequando esses períodos ao atual cenário econômico. Conforme discutimos, é importante levar em conta sua necessidade cotidiana, orçamento pessoal, passando por rentabilidade e riscos de seus investimentos.", align='L')
+    pdf.multi_cell(0, 9, f"\nMinha meta é te assessorar para que você encontre os melhores investimentos direcionados ao seu perfil e consiga fazer com que seu dinheiro renda para garantir a realização de seus planos de vida. Para isso, precisaremos de um acompanhamento e troca de informações constantes.", align='L')
+    pdf.multi_cell(0, 112, ' ', align='C')
+    
+    # Página 2
+    pdf.add_page()
+    #pdf.image('logo_investsmart.png', x=120, y=5, w=84, h=22)
+    pdf.set_font('Helvetica', 'B', size=18)
+    pdf.multi_cell(0, 20, ' ', align='C')
+    pdf.multi_cell(0, 9, '\nAnálise do Perfil\n\n', align='L')
+    pdf.set_font('Helvetica', 'B', size=12)
+    pdf.multi_cell(0, 9, 'Comportamentais/Pessoais:', align='L')
+    pdf.set_font('Helvetica', size=12)
+    pdf.multi_cell(0, 9, f'{perfil_comportamental}', align='L')
+    pdf.set_font('Helvetica', 'B', size=12)
+    pdf.multi_cell(0, 9, '\n\nTécnicos/Específicos:', align='L')
+    pdf.set_font('Helvetica', size=12)
+    pdf.multi_cell(0, 9, f'{perfil_tecnico}', align='L')
+    
+    if grafico_receita is not None:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+            grafico_receita.savefig(tmp_file, format='png', dpi=300)
+            image_buffer_receita = tmp_file.name
+        pdf.add_page()
+        pdf.set_font('Helvetica', 'B', size=18)
+        pdf.multi_cell(0, 20, ' ', align='C')
+        pdf.multi_cell(0, 9, '\nContexto Atual Financeiro\n\n', align='L')
+        pdf.set_font('Helvetica', size=12)
+        pdf.multi_cell(0, 9, f"1. Sua capacidade de poupança mensal é de R$ {cap_poupanca:.2f}.", align='L')
+    
+        pdf.image(image_buffer_receita, w=120, x=60)
+    
+    if grafico_receita_despesa is not None:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+            grafico_receita_despesa.savefig(tmp_file, format='png', dpi=300)
+            image_buffer_rec_desp = tmp_file.name
+        pdf.add_page()
+        pdf.image(image_buffer_rec_desp, w=120)
+        
+    if grafico_patrimonio is not None:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+            grafico_patrimonio.savefig(tmp_file, format='png', dpi=300)
+            image_buffer_patrim = tmp_file.name
+        pdf.add_page()
+        pdf.image(image_buffer_patrim, w=180)
+    
+    if grafico_geren_risco is not None:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+            grafico_geren_risco.savefig(tmp_file, format='png', dpi=300)
+            image_buffer_ger_risco = tmp_file.name
+        pdf.add_page()
+        pdf.image(image_buffer_ger_risco, w=100)
+    
+    if grafico_consol is not None:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+            grafico_consol.savefig(tmp_file, format='png', dpi=300)
+            image_buffer_consol = tmp_file.name
+        pdf.add_page()
+        pdf.image(image_buffer_consol, w=100)
+    
+    
+    # Exporta o PDF
+    gen_pdf = pdf.output(dest='S').encode('latin1')
+    
+    return gen_pdf
 
 st.markdown('### Núcelo Familiar')
 col1, col2, col3, col4 = st.columns(4)
@@ -189,30 +345,24 @@ if filhos == 'Sim':
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         nome_filho1 = st.text_input('Nome Filho(a)', key='nome_filho1')
-        st.write('')
-        st.write('')
-        st.write('')
-        nome_filho3 = st.text_input('Nome Filho(a)', key='nome_filho3')
-        
-    with col2:
         nascimento_filho1 = st.date_input('Data de Nascimento Filho(a)', format='DD/MM/YYYY', key='nascim_filho1')
         idade_filho1 = calcula_idade(nascimento_filho1)
         st.write(str(idade_filho1), 'anos')
-        nascimento_filho3 = st.date_input('Data de Nascimento Filho(a)', format='DD/MM/YYYY', key='nascim_filho3')
-        idade_filho3 = calcula_idade(nascimento_filho3)
-        st.write(str(idade_filho3), 'anos')
         
-    with col3:
+    with col2:
         nome_filho2 = st.text_input('Nome Filho(a)', key='nome_filho2')
-        st.write('')
-        st.write('')
-        st.write('')
-        nome_filho4 = st.text_input('Nome Filho(a)', key='nome_filho4')
-
-    with col4:
         nascimento_filho2 = st.date_input('Data de Nascimento Filho(a)', format='DD/MM/YYYY', key='nascimento_filho2')
         idade_filho2 = calcula_idade(nascimento_filho2)
         st.write(str(idade_filho2), 'anos')
+        
+    with col3:
+        nome_filho3 = st.text_input('Nome Filho(a)', key='nome_filho3')
+        nascimento_filho3 = st.date_input('Data de Nascimento Filho(a)', format='DD/MM/YYYY', key='nascim_filho3')
+        idade_filho3 = calcula_idade(nascimento_filho3)
+        st.write(str(idade_filho3), 'anos')
+
+    with col4:
+        nome_filho4 = st.text_input('Nome Filho(a)', key='nome_filho4')
         nascimento_filho4 = st.date_input('Data de Nascimento Filho(a)', format='DD/MM/YYYY', key='nascim_filho4')
         idade_filho4 = calcula_idade(nascimento_filho4)
         st.write(str(idade_filho4), 'anos')
@@ -254,7 +404,6 @@ with col1:
     st.metric('Sua capacidade de poupança mensal é', f'R$ {cap_poupanca:.2f}')
 with col2:
     st.metric('Sua capacidade de poupança anual é', f'R$ {cap_poupanca_anual:.2f}')
-
 st.markdown('---')
 
 
@@ -265,7 +414,7 @@ if md_invest:
     col1, col2, col3 = st.columns([1, 2, 1])  
     with col1:
         categorias = ['Ações', 'FIIs', 'Renda Fixa', 'Tesouro Direto', 'Fundos de Ações',
-                    'Fundos de Renda Fixa', 'Fundos Multimercados', 'Moeda', 'Cripto']
+                    'Fundos de Renda Fixa', 'Fundos Multimercados', 'Moeda', 'ETFs', 'Cripto']
         cat1 = st.selectbox('Categoria', categorias, key='cat1')
         cat2 = st.selectbox('Categoria', categorias, key='cat2', index=1)
         cat3 = st.selectbox('Categoria', categorias, key='cat3', index=2)
@@ -294,6 +443,94 @@ if md_invest:
         invest_atual = valor_ativos1 + valor_ativos2 + valor_ativos3 + valor_ativos4 + valor_ativos5 + valor_ativos6 + valor_ativos7
         st.metric('Patrimônio Atual', f'R$ {invest_atual:.2f}')
 st.markdown('---')
+
+st.markdown('### Investimentos Internacionais')
+md_offshore = st.toggle('Adicionar investimentos internacionais')
+invest_atual_offshore = 0
+if md_offshore:
+    col1, col2, col3 = st.columns([1, 2, 1])  
+    with col1:
+        categorias_internacional = ['Stocks', 'REITs', 'Bonds', 'Treasures', 'Funds', 'Mutual Funds', 'ETFs']
+        offshore1 = st.selectbox('Categoria', categorias_internacional, key='offshore1')
+        offshore2 = st.selectbox('Categoria', categorias_internacional, key='offshore2', index=1)
+        offshore3 = st.selectbox('Categoria', categorias_internacional, key='offshore3', index=2)
+        offshore4 = st.selectbox('Categoria', categorias_internacional, key='offshore4', index=3)
+        offshore5 = st.selectbox('Categoria', categorias_internacional, key='offshore5', index=4)
+        offshore6 = st.selectbox('Categoria', categorias_internacional, key='offshore6', index=5)
+        
+    with col2:
+        categoria_invest(offshore1, 1)
+        categoria_invest(offshore2, 2)
+        categoria_invest(offshore3, 3)
+        categoria_invest(offshore4, 4)
+        categoria_invest(offshore5, 5)
+        categoria_invest(offshore6, 6)
+            
+    with col3:
+        valor_ativos_offshore1 = st.number_input('Valor total dos ativos', key='valoff1')
+        valor_ativos_offshore2 = st.number_input('Valor total dos ativos', key='valoff2')
+        valor_ativos_offshore3 = st.number_input('Valor total dos ativos', key='valoff3')
+        valor_ativos_offshore4 = st.number_input('Valor total dos ativos', key='valoff4')
+        valor_ativos_offshore5 = st.number_input('Valor total dos ativos', key='valoff5')
+        valor_ativos_offshore6 = st.number_input('Valor total dos ativos', key='valoff6')
+        invest_atual_offshore = valor_ativos_offshore1 + valor_ativos_offshore2 + valor_ativos_offshore3 + valor_ativos_offshore4 + valor_ativos_offshore5 + valor_ativos_offshore6
+        st.metric('Patrimônio Internacional Atual', f'R$ {invest_atual_offshore:.2f}')      
+st.markdown('---')   
+
+
+st.markdown('### Seguros e Previdência')
+md_protect = st.toggle('Adicionar seguros e previdências')
+protect = 0
+prev_atual = 0
+seg_atual = 0
+seg_atual_conj = 0
+fgts = 0
+seguro_vida = 0
+if md_protect:
+    col1, col2, col3, col4, col5, col6 = st.columns([1, 2, 2, 1, 1, 1])
+    with col1:
+        op_prev = st.selectbox('Possui Previdência Privada?', ['Sim', 'Não'], index=1)
+    if op_prev == 'Sim':
+        with col2:
+            nome_prev = st.text_input('Nome da Previdência')
+        with col3:
+            inst_prev = st.text_input('Instituição')
+        with col4:
+            tipo_prev = st.selectbox('Tipo de Previdência', ['PGBL', 'VGBL'])
+        with col5:    
+            reg_trib_prev = st.selectbox('Regime Tributário', ['Progressivo', 'Regressivo'])
+        with col6:    
+            prev_atual = st.number_input('Valor da Previdência')
+    with st.container():
+        col1, col2, col3 = st.columns([1, 6, 1])
+        with col1:
+            op_seg = st.selectbox('Possui Seguro de Vida?', ['Sim', 'Não'], index=1) 
+            if op_seg == 'Sim':
+                with col2:
+                    seguradora = st.text_input('Seguradora')
+                with col3:
+                    seg_atual = st.number_input('Valor do Prêmio')
+    with st.container():
+        col1, col2, col3 = st.columns([1, 6, 1])
+        if estado_civil == 'Casado(a) / União Estável':
+            with col1:
+                op_seg_conj = st.selectbox('Cônjuge Possui Seguro de Vida?', ['Sim', 'Não'], index=1) 
+                if op_seg_conj == 'Sim':
+                    with col2:
+                        seguradora_conj = st.text_input('Seguradora', key='seg_conj')
+                    with col3:
+                        seg_atual_conj = st.number_input('Valor do Prêmio', key='vlr_seg_coj')
+    with st.container():
+        col1, col2, col3 = st.columns([1, 6, 1])
+        with col1:
+            op_fgts = st.selectbox('Possui FGTS?', ['Sim', 'Não'], index=1) 
+            if op_fgts == 'Sim':                
+                with col3:
+                    fgts = st.number_input('Valor do FGTS') 
+    seguro_vida = seg_atual + seg_atual_conj
+    protect = prev_atual + seg_atual + seg_atual_conj + fgts
+    st.metric('Proteções Totais', f'R$ {(protect):.2f}')   
+st.markdown('---')   
 
 
 st.markdown('### Bens Mobiliários e Imobiliários')
@@ -351,7 +588,7 @@ if md_bens:
         renda_bens7 = st.number_input('Renda do bem', key='rendabens7')
 st.markdown('---')
 
-patrimonio_total = invest_atual + bens_atual
+patrimonio_total = invest_atual + bens_atual + invest_atual_offshore
 
 st.markdown('### Independência Financeira')
 col1, col2, col3, col4 = st.columns(4)  
@@ -382,6 +619,23 @@ valor_inv = npf.fv(0, anos_invest, -cap_poupanca_anual, -invest_atual).round(2)
 df_patrimonio = calcula_patrimonio(idade_cliente, idade_indep, invest_atual, cap_poupanca_anual, renda_indep, juro_real)
 df_independencia = calcula_independencia(idade_cliente, idade_indep, invest_atual, cap_poupanca_anual, renda_indep, juro_real)
 df_evolucao = pd.concat([df_patrimonio, df_independencia]).drop_duplicates('Patrimônio Acumulado')
+
+fig_patr, ax_patr = plt.subplots(figsize=(12, 6))
+ax_patr.plot(df_evolucao.index, df_evolucao['Valor Investido'], label='Valor Investido')
+ax_patr.plot(df_evolucao.index, df_evolucao['Patrimônio Acumulado'], label='Patrimônio Acumulado')
+ax_patr.plot(df_evolucao.index, df_evolucao['Vitalício'], label='Vitalício')
+ax_patr.plot(df_evolucao.index, df_evolucao['Consumo Patrimônio'], label='Consumo Patrimônio')
+
+ax_patr.set_xlabel('Idade')
+ax_patr.set_ylabel('Valor')
+ax_patr.set_title('Evolução Patrimonial')
+ax_patr.legend()
+
+def millions_formatter(x, pos):
+    return f'{x / 1e6:.1f}M'
+ax_patr.yaxis.set_major_formatter(FuncFormatter(millions_formatter))
+
+
 
 tab1, tab2, tab3, tab4 = st.tabs(["📈 Evolução Patrimonial", "Acumulação de Patrimônio", "Independência Financeira", "🗃 Dados"])
 with tab1:
@@ -481,71 +735,199 @@ if cenario2:
     with col3:
         st.metric('Patrimônio para renda vitalícia', f'R$ {patrim_vitalicio_2:.2f}', f'{(patrim_acumulado_2/patrim_vitalicio_2-1)*100:.2f}%')
         st.metric('Aportes Mensais', f'R$ {parcela_vitalicio_2:.2f}')
-
 st.markdown('---')
 
 
 if receita_mensal > 0 and despesa_mensal > 0:
     st.write('### Receitas')
     col1, col2, col3, col4 = st.columns(4)
+    valores_receita = [receita_mensal]
+    rotulos_receita = ['Receita']
+    if outras_receitas > 0:
+        valores_receita = [receita_mensal, outras_receitas]
+        rotulos_receita = ['Receita', 'Outras Receitas']
+    if estado_civil == 'Casado(a) / União Estável':
+        valores_receita = [receita_mensal, receita_conjuge, outras_receitas]
+        rotulos_receita = ['Receita', 'Receita do Cônjuge', 'Outras Receitas']
+      
     with col1:
-        st.write('Receitas x Despesas')
-        plt.style.use('_mpl-gallery-nogrid')
-        x = [receita_mensal, outras_receitas, receita_conjuge]
-        colors = plt.get_cmap('Blues')(np.linspace(0.2, 0.7, len(x)))
-        fig, ax = plt.subplots()
-        ax.pie(x, colors=colors, radius=3, center=(4, 4),
-            wedgeprops={"linewidth": 1, "edgecolor": "white"}, frame=False, labels=x)
-        st.pyplot(fig)
+        st.write('Distribuição das Receitas')
+        fig_receita, ax_rec = plt.subplots(figsize=(3,3))
+        ax_rec.pie(valores_receita, labels=rotulos_receita, autopct='%1.1f%%', 
+            startangle=90, radius=1, center=(1, 1))
+        ax_rec.axis('equal')
+        st.pyplot(fig_receita)
         
     with col3:
-        st.write('Distribuição das Receitas')
-        plt.style.use('_mpl-gallery-nogrid') 
+        st.write('Receitas x Despesas')
         x = [receita_total, despesa_mensal, cap_poupanca]
-        colors = plt.get_cmap('Blues')(np.linspace(0.2, 0.7, len(x)))
-        fig, ax = plt.subplots()
-        ax.pie(x, colors=colors, radius=3, center=(4, 4),
-            wedgeprops={"linewidth": 1, "edgecolor": "white"}, frame=False, labels=x)
+        rotulos_rec_desp = ['Receita Total', 'Despesa Mensal', 'Capacidade de Poupança']
+        fig_rec_desp, ax_rec_desp = plt.subplots(figsize=(3,3))
+        ax_rec_desp.pie(x, labels=rotulos_rec_desp, autopct='%1.1f%%', 
+            startangle=90, radius=1, center=(1, 1))
         
-        st.pyplot(fig)
+        st.pyplot(fig_rec_desp)
+        
+          
+        
+        
+            
+        
+        
     st.markdown('---')
+
 
 if patrim_acumulado > 0:
     st.write('### Gerenciamento de Risco')
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col1:
+        invest_atual_protec = invest_atual + seguro_vida
+        receita_familia = receita_conjuge + outras_receitas
+        st.metric('Seguro Invalidez Atual', f'R$ {seguro_vida:.2f}')
+        st.metric('Investimentos Atuais', f'R$ {invest_atual:.2f}')
+        st.metric('Capital Total + Proteção', f'R$ {invest_atual_protec:.2f}')
+        st.metric('Despesas Anuais', f'R$ {(despesa_mensal * 12):.2f}')
+        st.metric('Salário Cônjuge Anual + Outras Receitas', f'R$ {(receita_familia * 12):.2f}')
+        if receita_familia < despesa_mensal:
+            reposicao_despesa = despesa_mensal - receita_familia
+            resgate_anual_bruto = reposicao_despesa * 12 / 0.85
+            st.metric('Reposição das Despesas', f'R$ {(reposicao_despesa * 12):.2f}', f'{(receita_familia/despesa_mensal-1)*100:.2f}%')
+    with col2:
+        df_gerenc_risco, anos_gerenc_risco = calcula_gerenc_risco(invest_atual_protec, resgate_anual_bruto, juro_real)
+        tab1, tab2 = st.tabs(["📈 Tempo de Consumo Capital", "🗃 Dados"])
+        with tab1:
+            st.subheader('Tempo de Consumo Capital')
+            st.line_chart(df_gerenc_risco)
+        with tab2:
+            st.subheader('Dados Detalhados')
+            st.dataframe(df_gerenc_risco) 
+    with col3:
+        st.metric('Tempo de Uso do Capital', f'{anos_gerenc_risco} anos')
+        st.metric('Idade Que Termina o Capital', f'{idade_cliente + anos_gerenc_risco} anos')
+    
+    fig_ger_risco, ax_ger_risco = plt.subplots(figsize=(8, 6))
+
+    ax_ger_risco.plot(df_gerenc_risco.index, df_gerenc_risco['Patrimônio'])
+    ax_ger_risco.set_xlabel('Ano')
+    ax_ger_risco.set_ylabel('Patrimônio')
+    ax_ger_risco.set_title('Gerenciamento de Risco')
     
     
     st.markdown('---')
     
     
     st.write('### Inventário')
-    col1, col2, col3, col4 = st.columns(4)
-    
-    
+    col1, col2, col3, col4 = st.columns([1, 2, 2, 2])
+    with col1:
+        itcmd = st.number_input('Alíquota ITCMD', value=4.0, step=0.05) / 100
+        tx_adv = st.number_input('Outras Taxas', value=10.0, step=0.5) / 100
+        pct_inventario = st.number_input('Porcentagem do Inventário', value=50, step=1) / 100
+    with col2:    
+        st.metric('Previdência Privada Atual', f'R$ {prev_atual:.2f}')
+        invest_atual_protec = invest_atual + seguro_vida
+        st.metric('Seguro Vida Atual', f'R$ {seguro_vida:.2f}')
+        st.metric('FGTS', f'R$ {(fgts):.2f}')
+        st.metric('Proteções Totais', f'R$ {protect:.2f}')
+    with col3:
+        custo_inv = itcmd + tx_adv
+        custo_inv_fin = invest_atual * custo_inv
+        custo_inv_bens = bens_atual * pct_inventario * custo_inv
+        st.metric('Patrimônio Financeiro', f'R$ {invest_atual:.2f}')
+        st.metric('Patrimônio Imobilizado', f'R$ {bens_atual:.2f}')
+    with col4:
+        st.metric('Custo Inventário Ativos Financeiros', f'R$ {custo_inv_fin:.2f}')
+        st.metric('Custo Inventário Bens Imobilizados', f'R$ {custo_inv_bens:.2f}')
+        custo_inventario = custo_inv_fin + custo_inv_bens
+        st.metric('Custo Total de Inventário', f'R$ {custo_inventario:.2f}')
     st.markdown('---')
     
     
-    st.write('### Despesas')
-    col1, col2, col3, col4 = st.columns(4)
-    
-    
-    st.markdown('---')
+    if receita_familia < despesa_mensal:
+        st.write('### Despesas')
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            tempo_despesa = st.number_input('Tempo para cobrir as despesas', value=5.0, step=0.5)
+            vlr_nec_cap_hoje = npf.pv(juro_real, tempo_despesa, -reposicao_despesa * 12, 0)
+            custo_total_despesa = vlr_nec_cap_hoje + custo_inventario
+            st.metric(f'Valor Necessário p/ Cobertura de Despesa por {tempo_despesa:.0f} anos', f'R$ {vlr_nec_cap_hoje:.2f}')
+            st.metric('Custo Total Despesas + Inventário', f'R$ {custo_total_despesa:.2f}')
+        with col2:
+            st.metric('Despesas Anuais', f'R$ {(despesa_mensal * 12):.2f}')
+        with col3:
+            st.metric('Salário Cônjuge Anual + Outras Receitas', f'R$ {(receita_familia * 12):.2f}')
+        with col4:
+            st.metric('Reposição das Despesas', f'R$ {(reposicao_despesa * 12):.2f}', f'{(receita_familia/despesa_mensal-1)*100:.2f}%')
+        st.markdown('---')
 
-
+    custo_educacao = 0
     if filhos == 'Sim':    
         st.write('### Proteção de Educação')
         col1, col2, col3, col4 = st.columns(4)
-        
-        
+        with col1:
+            idade_term_estudos1 = st.slider('Idade de Término os Estudos', min_value=17, max_value=100, value=24, step=1)
+            gasto_estudo1 = st.number_input('Custo Mensal com Educação')
+            prz_term_estudos1 = idade_term_estudos1 - idade_filho1
+            vlr_nec_educ1 = npf.pv(juro_real, prz_term_estudos1, -gasto_estudo1, 0) * 12
+            st.metric(nome_filho1, f'R$ {vlr_nec_educ1:.2f}', f'{prz_term_estudos1:.0f} anos restantes', delta_color='off')
+        with col2:
+            vlr_nec_educ2 = 0
+            if idade_filho2 > 0:
+                idade_term_estudos2 = st.slider('Idade de Término os Estudos', min_value=17, max_value=100, value=24, step=1)
+                gasto_estudo2 = st.number_input('Custo Mensal com Educação')
+                prz_term_estudos2 = idade_term_estudos2 - idade_filho2
+                vlr_nec_educ2 = npf.pv(juro_real, prz_term_estudos2, -gasto_estudo2, 0) * 12
+                st.metric(nome_filho2, f'R$ {vlr_nec_educ2:.2f}',f'{prz_term_estudos2:.0f} anos restantes', delta_color='off')
+        with col3:
+            vlr_nec_educ3 = 0
+            if idade_filho3 > 0:
+                idade_term_estudos3 = st.slider('Idade de Término os Estudos', min_value=17, max_value=100, value=24, step=1)
+                gasto_estudo3 = st.number_input('Custo Mensal com Educação')
+                prz_term_estudos3 = idade_term_estudos3 - idade_filho3
+                vlr_nec_educ3 = npf.pv(juro_real, prz_term_estudos3, -gasto_estudo3, 0) * 12
+                st.metric(nome_filho3, f'R$ {vlr_nec_educ3:.2f}',f'{prz_term_estudos3:.0f} anos restantes', delta_color='off')
+        with col4:
+            vlr_nec_educ4 = 0
+            if idade_filho4 > 0:
+                idade_term_estudos4 = st.slider('Idade de Término os Estudos', min_value=17, max_value=100, value=24, step=1)
+                gasto_estudo4 = st.number_input('Custo Mensal com Educação')
+                prz_term_estudos4 = idade_term_estudos4 - idade_filho4
+                vlr_nec_educ4 = npf.pv(juro_real, prz_term_estudos4, -gasto_estudo4, 0) * 12
+                st.metric(nome_filho4, f'R$ {vlr_nec_educ4:.2f}',f'{prz_term_estudos4:.0f} anos restantes', delta_color='off')
+        custo_educacao = vlr_nec_educ1 + vlr_nec_educ2 + vlr_nec_educ3 + vlr_nec_educ4
+        st.metric('Custo Total Com Educação', f'R$ {custo_educacao:.2f}')
         st.markdown('---')
     
     
     st.write('### Consolidação')
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
+    custo_sucessorio = round(custo_educacao + custo_total_despesa, 2)
+    df_consol = pd.DataFrame([{'Custo Sucessório': custo_sucessorio},
+                              {'Proteções Atuais': invest_atual_protec}])
     
-    
+    with col1:
+        st.metric('Custo Sucessório', f'R$ {custo_sucessorio:.2f}')
+        st.metric('Proteções Totais', f'R$ {invest_atual_protec:.2f}')
+        st.metric('Diferença', f'R$ {custo_sucessorio - invest_atual_protec:.2f}', f'{(invest_atual_protec/custo_sucessorio-1)*100:.2f}%')
+    with col2:
+        st.bar_chart(df_consol)
     st.markdown('---')
 
+    consol_cat = ['Custo Sucessório', 'Proteções Atuais']
+    consol_vlr = [custo_sucessorio, invest_atual_protec]
+
+    fig_consol, ax_consol = plt.subplots(figsize=(8, 6))
+
+    ax_consol.bar(consol_cat, consol_vlr)
+    ax_consol.set_ylabel('Valor')
+    ax_consol.set_title('Custo Sucessório vs. Proteções Atuais')
+    
+
+    perfil_comportamental = st.text_area('Aspectos comportamentais e pessoais do cliente')
+    perfil_tecnico = st.text_area('Aspectos técnicos e específicos do cliente')
+    st.markdown('---')
+
+    pdf = gerar_pdf(fig_receita, fig_rec_desp, fig_patr, fig_ger_risco, fig_consol)
+    st.download_button("Baixar PDF", pdf, key="download_pdf", mime="application/pdf")
 
 
 st.sidebar.header('Resumo')
@@ -554,14 +936,29 @@ if idade_cliente > 0:
     st.sidebar.write(str(idade_cliente), 'anos')
     if estado_civil == 'Casado(a) / União Estável':
         st.sidebar.write(f'Casado(a) com {nome_conjuge}')
-    if filhos == 'Sim':    
-        st.sidebar.write('Filho(a)')
-        st.sidebar.write(nome_filho1)
-        st.sidebar.write(nome_filho2)
-        st.sidebar.write(nome_filho3)
-        st.sidebar.write(nome_filho4)
+    if filhos == 'Sim':
+        st.sidebar.write('Com o(s) Filhos(as)')
+        st.sidebar.write(f'{nome_filho1} de {idade_filho1:.0f} ano(s)')
+        if idade_filho2 > 0:
+            st.sidebar.write(f'{nome_filho2} de {idade_filho2:.0f} ano(s)')
+        if idade_filho3 > 0:
+            st.sidebar.write(f'{nome_filho3} de {idade_filho3:.0f} ano(s)')
+        if idade_filho4 > 0:    
+            st.sidebar.write(f'{nome_filho4} de {idade_filho4:.0f} ano(s)')
     st.sidebar.write(f'Receita mensal familiar de R$ {receita_total:.2f}')
     st.sidebar.write(f'Despesa mensal familiar de R$ {despesa_mensal:.2f}')
     st.sidebar.write(f'Cap. poupança mensal de R$ {cap_poupanca:.2f}')
-    st.sidebar.write(f'Investimentos atuais R$ {invest_atual:.2f}')
+    st.sidebar.write(f'Investimentos R$ {invest_atual:.2f}')
+    st.sidebar.write(f'Inv. Internacional R$ {invest_atual_offshore:.2f}')
+    st.sidebar.write(f'Previdência R$ {prev_atual:.2f}')
+    st.sidebar.write(f'Seguro de Vida R$ {seguro_vida:.2f}')
+    st.sidebar.write(f'FGTS R$ {fgts:.2f}')
     st.sidebar.write(f'Valores em bens atuais R$ {bens_atual:.2f}')
+    st.sidebar.write(f'Custo Inventário R$ {custo_inventario:.2f}')
+    if receita_familia < despesa_mensal:
+        st.sidebar.write(f'Cobertura da Despesa por {tempo_despesa:.0f} anos\nR$ {vlr_nec_cap_hoje:.2f}')
+    if filhos == 'Sim':
+        st.sidebar.write(f'Custos Educacionais R$ {custo_educacao:.2f}')
+    st.sidebar.write(f'Proteções Totais R$ {protect:.2f}')
+    st.sidebar.write(f'Custo Sucessório R$ {custo_sucessorio:.2f}')
+    
