@@ -13,11 +13,11 @@ def main():
             Page('pages/Raio-X Financeiro.py', 'Raio-X Financeiro', '📊'),
             Page('pages/Magic Formula.py', 'Magic Formula', '🎯'),
             Page('pages/Calculadora.py', 'Calculadora Financeira', '🧮'),
+            Page('pages/value_investing.py', 'Value Investing', '🔎'),
             Section('PMF', '👨🏻‍💻'),
-            # Pages after a section will be indented
             Page('pages/Fundamentos.py', 'Fundamentos', '📊'),
             Page('pages/Panorama de Mercado.py', 'Panorama de Mercado', '📰'),
-            Page('pages/Rentabilidades Mensais.py', 'Rentabilidades Mensais', '📈'),
+            Page('pages/Rentabilidades Mensais.py', 'Rentabilidades Mensais', '📈')
             # Unless you explicitly say in_section=False
         ]
     )
