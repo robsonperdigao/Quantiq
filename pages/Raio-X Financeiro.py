@@ -26,18 +26,18 @@ Preencha as informações abaixo:""")
 
 @st.cache_data
 def calcula_idade(nascimento): 
-    today = date.today() 
+    hoje = date.today() 
     try:  
-        birthday = nascimento.replace(year = today.year) 
+        nasc = nascimento.replace(year = hoje.year) 
   
     except ValueError:  
-        birthday = nascimento.replace(year = today.year, 
+        nasc = nascimento.replace(year = hoje.year, 
                   month = nascimento.month + 1, day = 1) 
   
-    if birthday > today: 
-        return today.year - nascimento.year - 1
+    if nasc > hoje: 
+        return hoje.year - nascimento.year - 1
     else: 
-        return today.year - nascimento.year 
+        return hoje.year - nascimento.year 
     
 @st.cache_data
 def calcula_patrimonio(idade, idade_indep, patrim_atual, cap_poup_ano, renda_mensal_indep, tx_juro_ano): 
@@ -106,8 +106,12 @@ def calcula_independencia(idade, idade_indep, patrim_atual, cap_poup_ano, renda_
     df = df.set_index('Idade')
     return df
 
-def calcula_gerenc_risco(patrimonio, saque_anual, tx_juros):
-    anos = round(float(npf.nper(tx_juros, -saque_anual, patrimonio, 0)))
+def calcula_gerenc_risco(patrimonio, saque_anual=0.0, tx_juros=0.04):
+    try:
+        anos = round(float(npf.nper(tx_juros, -saque_anual, patrimonio, 0)))
+    except OverflowError:
+        anos = 1
+
     anos_lista = list(range(1, anos + 1))
     patrimonio_lista = []
     saque_lista = []
@@ -186,7 +190,7 @@ def categoria_invest(categoria, key):
 class PDFWithFooter(FPDF):
     def header(self):
         self.image('logo_investsmart.png', x=65, y=5, w=84, h=22)
-
+        
     def footer(self):
         self.set_y(-15)
         self.set_font('Helvetica', 'I',size=9)
@@ -194,7 +198,8 @@ class PDFWithFooter(FPDF):
 
 def gerar_pdf(grafico_receita, grafico_receita_despesa, grafico_patrimonio, grafico_geren_risco, grafico_consol):
     pdf = PDFWithFooter()
-    
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_draw_color(153, 102, 255)
     mes = date.today().strftime('%B')
     ano = date.today().strftime('%Y')
     meses = {
@@ -227,72 +232,144 @@ def gerar_pdf(grafico_receita, grafico_receita_despesa, grafico_patrimonio, graf
     # Página 1
     pdf.add_page()
     pdf.set_font('Helvetica', 'B', size=18)
-    pdf.multi_cell(0, 20, ' ', align='C')
-    pdf.multi_cell(0, 9, '\nAssessoria de Investimentos\n\n', align='L')
+    pdf.ln(30)
+    pdf.cell(0, 9, 'Assessoria de Investimentos')
+    pdf.ln(20)
     pdf.set_font('Helvetica', 'B', size=12)
     pdf.multi_cell(0, 9, f"{nome_cliente},", align='L')
     pdf.set_font('Helvetica', size=12)
     pdf.multi_cell(0, 9, f"Esse estudo foi desenvolvido exclusivamente para você.\n\nConsiderei sua capacidade de poupança para atingir seus objetivos de curto, médio e longo prazo, adequando esses períodos ao atual cenário econômico. Conforme discutimos, é importante levar em conta sua necessidade cotidiana, orçamento pessoal, passando por rentabilidade e riscos de seus investimentos.", align='L')
     pdf.multi_cell(0, 9, f"\nMinha meta é te assessorar para que você encontre os melhores investimentos direcionados ao seu perfil e consiga fazer com que seu dinheiro renda para garantir a realização de seus planos de vida. Para isso, precisaremos de um acompanhamento e troca de informações constantes.", align='L')
-    pdf.multi_cell(0, 112, ' ', align='C')
+    
     
     # Página 2
     pdf.add_page()
-    #pdf.image('logo_investsmart.png', x=120, y=5, w=84, h=22)
     pdf.set_font('Helvetica', 'B', size=18)
-    pdf.multi_cell(0, 20, ' ', align='C')
-    pdf.multi_cell(0, 9, '\nAnálise do Perfil\n\n', align='L')
+    #pdf.multi_cell(0, 20, ' ', align='C')
+    pdf.ln(30)
+    #pdf.multi_cell(0, 9, '\nAnálise do Perfil\n\n', align='L')
+    pdf.cell(0, 9, 'Análise do Perfil')
+    pdf.ln(20)
     pdf.set_font('Helvetica', 'B', size=12)
-    pdf.multi_cell(0, 9, 'Comportamentais/Pessoais:', align='L')
+    pdf.multi_cell(0, 9, 'Aspectos Comportamentais e Pessoais:')
     pdf.set_font('Helvetica', size=12)
     pdf.multi_cell(0, 9, f'{perfil_comportamental}', align='L')
     pdf.set_font('Helvetica', 'B', size=12)
-    pdf.multi_cell(0, 9, '\n\nTécnicos/Específicos:', align='L')
+    pdf.ln(10)
+    pdf.multi_cell(0, 9, 'Aspectos Técnicos e Específicos:')
     pdf.set_font('Helvetica', size=12)
     pdf.multi_cell(0, 9, f'{perfil_tecnico}', align='L')
     
     if grafico_receita is not None:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
-            grafico_receita.savefig(tmp_file, format='png', dpi=300)
+            grafico_receita.savefig(tmp_file, format='png', dpi=300, transparent=True)
             image_buffer_receita = tmp_file.name
         pdf.add_page()
         pdf.set_font('Helvetica', 'B', size=18)
-        pdf.multi_cell(0, 20, ' ', align='C')
-        pdf.multi_cell(0, 9, '\nContexto Atual Financeiro\n\n', align='L')
+        pdf.ln(30)
+        pdf.cell(0, 9, 'Contexto Atual Financeiro')
+        pdf.ln(20)
         pdf.set_font('Helvetica', size=12)
-        pdf.multi_cell(0, 9, f"1. Sua capacidade de poupança mensal é de R$ {cap_poupanca:.2f}.", align='L')
-    
-        pdf.image(image_buffer_receita, w=120, x=60)
-    
+        if outras_receitas > 0 and receita_conjuge == 0:
+            pdf.multi_cell(0, 9, f"Sua receita atual é de R$ {receita_mensal:.2f}.\nAlém disso, possui outras receitas que compõem um valor de R$ {outras_receitas:.2f}.\nTotalizando R$ {receita_total:.2f} mensais.", align='L')
+            pdf.image(image_buffer_receita, w=80, x=55, y=80)
+        if outras_receitas > 0 and receita_conjuge > 0:
+            pdf.multi_cell(0, 9, f"Sua receita atual é de R$ {receita_mensal:.2f}.\nA receita do cônjuge é de R$ {receita_conjuge:.2f}.\nAlém disso, possui outras receitas que compõem um valor de R$ {outras_receitas:.2f}.\nTotalizando R$ {receita_total:.2f} mensais.", align='L')
+            pdf.image(image_buffer_receita, w=80, x=55, y=80)
+        if outras_receitas == 0 and receita_conjuge > 0:
+            pdf.multi_cell(0, 9, f"Sua receita atual é de R$ {receita_mensal:.2f}.\nA receita do cônjuge é de R$ {receita_conjuge:.2f}.\nTotalizando R$ {receita_total:.2f} mensais.", align='L')
+            pdf.image(image_buffer_receita, w=80, x=55, y=80)
+        if outras_receitas == 0 and receita_conjuge == 0:
+            pdf.multi_cell(0, 9, f"Sua receita atual é de R$ {receita_mensal:.2f}.", align='L')
+            pdf.image(image_buffer_receita, w=80, x=55, y=65)
+        pdf.ln(70)
+        
     if grafico_receita_despesa is not None:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
-            grafico_receita_despesa.savefig(tmp_file, format='png', dpi=300)
+            grafico_receita_despesa.savefig(tmp_file, format='png', dpi=300, transparent=True)
             image_buffer_rec_desp = tmp_file.name
-        pdf.add_page()
-        pdf.image(image_buffer_rec_desp, w=120)
+        pdf.multi_cell(0, 9, f'Em relação ao seu orçamento doméstico, suas despesas mensais somam R$ {despesa_mensal:.2f}, logo, sua capacidade de poupança é de R$ {cap_poupanca:.2f} mensais.')
+        pdf.image(image_buffer_rec_desp, w=90, x=55, y=170)
         
     if grafico_patrimonio is not None:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
-            grafico_patrimonio.savefig(tmp_file, format='png', dpi=300)
+            grafico_patrimonio.savefig(tmp_file, format='png', dpi=300, transparent=True)
             image_buffer_patrim = tmp_file.name
         pdf.add_page()
-        pdf.image(image_buffer_patrim, w=180)
+        pdf.set_font('Helvetica', 'B', size=18)
+        pdf.ln(30)
+        pdf.cell(0, 9, 'Independência Financeira')
+        pdf.ln(20)
+        pdf.set_font('Helvetica', size=12)
+        pdf.multi_cell(0, 9, f"Considerando sua capacidade de poupança atual de R$ {cap_poupanca:.2f} e uma taxa de juros real de {(juro_real*100):.2f}% ao ano, você irá obter um patrimônio de R$ {patrim_acumulado:.2f} aos {idade_indep} anos de idade.\nPara atingir o objetivo de independência financeira com renda mensal vitalícia de R$ {renda_indep:.2f} é necessário um patrimônio de R$ {pat_vitalicio:.2f}.\nE o valor de patrimônio para consumir até os 100 anos de idade é de R$ {pat_consumo:.2f}.", align='L')  
+        pdf.image(image_buffer_patrim, w=180, y=100)
+        pdf.ln(85)
+        if parcela_vitalicio > cap_poupanca:
+            pdf.multi_cell(0, 9, f'Para obter o patrimônio que gera renda vitalícia, é necessário um incremento na sua capacidade de poupança atual de R$ {parcela_vitalicio - cap_poupanca:.2f}.')
+        if parcela_consumo > cap_poupanca:
+            pdf.multi_cell(0, 9, f'Para obter o patrimônio de consumo até os 100 anos, é necessário um incremendo na sua capacidade de poupança atual de R$ {parcela_consumo - cap_poupanca:.2f}.')
     
+    if filhos == 'Sim':
+        pdf.add_page()
+        pdf.set_font('Helvetica', 'B', size=18)
+        pdf.ln(30)
+        pdf.cell(0, 9, 'Custos com Dependentes')
+        pdf.ln(20)
+        pdf.set_font('Helvetica', size=12)
+        pdf.multi_cell(0, 9, f"Devido aos custos com {nome_filho1}, os recursos necessários serão de R$ {vlr_nec_educ1:.2f} até os {prz_term_estudos1:.2f} anos.", align='L')  
+        
     if grafico_geren_risco is not None:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
-            grafico_geren_risco.savefig(tmp_file, format='png', dpi=300)
+            grafico_geren_risco.savefig(tmp_file, format='png', dpi=300, transparent=True)
             image_buffer_ger_risco = tmp_file.name
         pdf.add_page()
-        pdf.image(image_buffer_ger_risco, w=100)
-    
+        pdf.set_font('Helvetica', 'B', size=18)
+        pdf.ln(30)
+        pdf.cell(0, 9, 'Gerenciamento de Risco e Inventário')
+        pdf.ln(20)
+        pdf.set_font('Helvetica', size=12)
+        pdf.multi_cell(0, 9, f"Em caso de ausência, a família irá consumir o patrimônio financeiro em {tempo_despesa} anos, conforme gráfico:", align='L')
+        pdf.image(image_buffer_ger_risco, w=120, x=50, y=65)
+        pdf.ln(85)
+        pdf.multi_cell(0, 9, f'Previdência Privada: R$ {prev_atual:.2f}\nSeguro Invalidez: R$ {seg_atual:.2f}\nFGTS: R$ {fgts:.2f}\nProteções Totais: R$ {protect:.2f}', align='L')
+        pdf.multi_cell(0, 9, f'Patrimônio Financeiro: R$ {invest_atual:.2f}\nPatrimônio Imobilizado: R$ {bens_atual:.2f}')
+        pdf.multi_cell(0, 9, f"O valor Necessário para cobertura das despesas é de R$ {vlr_nec_cap_hoje:.2f}\nO valor total das despesas + inventário é de R$ {custo_total_despesa:.2f}", align='L')
+        pdf.multi_cell(0, 9, f"Custo do Inventário de Ativos Financeiros: R$ {custo_inv_fin:.2f}\nCusto do Inventário de Bens R$ {custo_inv_bens:.2f}\nCusto Total do Inventário: R$ {custo_inventario:.2f}", align='L') 
+
+        
     if grafico_consol is not None:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
-            grafico_consol.savefig(tmp_file, format='png', dpi=300)
+            grafico_consol.savefig(tmp_file, format='png', dpi=300, transparent=True)
             image_buffer_consol = tmp_file.name
         pdf.add_page()
-        pdf.image(image_buffer_consol, w=100)
+        pdf.set_font('Helvetica', 'B', size=18)
+        pdf.ln(30)
+        pdf.cell(0, 9, 'Consolidação')
+        pdf.ln(20)
+        pdf.set_font('Helvetica', size=12)
+        if custo_sucessorio > invest_atual_protec:
+            pdf.multi_cell(0, 9, f"Em caso de ausência, os custos totais de sucessão serão de aproximadamente R$ {custo_sucessorio:.2f}. Como sua proteção atual é de R$ {protect:.2f}, o valor não é suficiente para arcar com os custos de sucessão.", align='L')  
+        else:
+            pdf.multi_cell(0, 9, f"Em caso de ausência, os custos totais de sucessão serão de aproximadamente R$ {custo_sucessorio:.2f}. Como sua proteção atual é de R$ {protect:.2f}, o valor é suficiente para arcar com os custos de sucessão.", align='L')  
+        pdf.image(image_buffer_consol, w=120, x=50, y=75)
+        pdf.ln(85)
+        pdf.multi_cell(0, 9, demais_info, align='L')
     
-    
+    pdf.add_page()
+    pdf.set_font('Helvetica', 'B', size=18)
+    pdf.ln(30)
+    pdf.cell(0, 9, 'Conclusão')
+    pdf.ln(20)
+    pdf.set_font('Helvetica', size=12)
+    pdf.multi_cell(0, 9, conclusao, align='L')
+    pdf.set_font('Helvetica', 'B', size=18)
+    pdf.ln(20)
+    pdf.cell(0, 9, 'Próximos Passos')
+    pdf.ln(20)
+    pdf.set_font('Helvetica', size=12)
+    pdf.multi_cell(0, 9, proximos_passos, align='L')
+        
+        
     # Exporta o PDF
     gen_pdf = pdf.output(dest='S').encode('latin1')
     
@@ -369,7 +446,7 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     receita_mensal = st.number_input('Receita Mensal')
     receita_conjuge = 0
-
+    receita_familia = 0
 with col2:
     outras_receitas = st.number_input('Outras Receitas')
     
@@ -404,6 +481,8 @@ st.markdown('---')
 st.markdown('### Investimentos')
 md_invest = st.toggle('Adicionar investimentos atuais')
 invest_atual = 0
+custo_inventario = 0
+custo_sucessorio = 0
 if md_invest:
     col1, col2, col3 = st.columns([1, 2, 1])  
     with col1:
@@ -777,6 +856,7 @@ if patrim_acumulado > 0:
     with col1:
         invest_atual_protec = invest_atual + seguro_vida
         receita_familia = receita_conjuge + outras_receitas
+        
         st.metric('Seguro Invalidez Atual', f'R$ {seguro_vida:.2f}')
         st.metric('Investimentos Atuais', f'R$ {invest_atual:.2f}')
         st.metric('Capital Total + Proteção', f'R$ {invest_atual_protec:.2f}')
@@ -786,7 +866,10 @@ if patrim_acumulado > 0:
             reposicao_despesa = despesa_mensal - receita_familia
             resgate_anual_bruto = reposicao_despesa * 12 / 0.85
             st.metric('Reposição das Despesas', f'R$ {(reposicao_despesa * 12):.2f}', f'{(receita_familia/despesa_mensal-1)*100:.2f}%')
+        else:
+            resgate_anual_bruto = 0.0
     with col2:
+        
         df_gerenc_risco, anos_gerenc_risco = calcula_gerenc_risco(invest_atual_protec, resgate_anual_bruto, juro_real)
         tab1, tab2 = st.tabs(["📈 Tempo de Consumo Capital", "🗃 Dados"])
         with tab1:
@@ -796,15 +879,16 @@ if patrim_acumulado > 0:
             st.subheader('Dados Detalhados')
             st.dataframe(df_gerenc_risco) 
     with col3:
+        
         st.metric('Tempo de Uso do Capital', f'{anos_gerenc_risco} anos')
         st.metric('Idade Que Termina o Capital', f'{idade_cliente + anos_gerenc_risco} anos')
-    
-    fig_ger_risco, ax_ger_risco = plt.subplots(figsize=(8, 6))
 
-    ax_ger_risco.plot(df_gerenc_risco.index, df_gerenc_risco['Patrimônio'])
-    ax_ger_risco.set_xlabel('Ano')
-    ax_ger_risco.set_ylabel('Patrimônio')
-    ax_ger_risco.set_title('Gerenciamento de Risco')
+        fig_ger_risco, ax_ger_risco = plt.subplots(figsize=(8, 6))
+
+        ax_ger_risco.plot(df_gerenc_risco.index, df_gerenc_risco['Patrimônio'])
+        ax_ger_risco.set_xlabel('Ano')
+        ax_ger_risco.set_ylabel('Patrimônio')
+        ax_ger_risco.set_title('Gerenciamento de Risco')
     
     
     st.markdown('---')
@@ -852,43 +936,49 @@ if patrim_acumulado > 0:
         with col4:
             st.metric('Reposição das Despesas', f'R$ {(reposicao_despesa * 12):.2f}', f'{(receita_familia/despesa_mensal-1)*100:.2f}%')
         st.markdown('---')
+    else: 
+        custo_total_despesa = 0    
+        tempo_despesa = 1
+        vlr_nec_cap_hoje = 0
+        
+
 
     custo_educacao = 0
     if filhos == 'Sim':    
-        st.write('### Proteção de Educação')
+        st.write('### Proteção de Dependentes')
         col1, col2, col3, col4 = st.columns(4)
         with col1:
-            idade_term_estudos1 = st.slider('Idade de Término os Estudos', min_value=17, max_value=100, value=24, step=1)
-            gasto_estudo1 = st.number_input('Custo Mensal com Educação')
+            idade_term_estudos1 = st.slider('Idade de Término com Dependente', min_value=17, max_value=100, value=24, step=1)
+            gasto_estudo1 = st.number_input('Custo Mensal')
             prz_term_estudos1 = idade_term_estudos1 - idade_filho1
             vlr_nec_educ1 = npf.pv(juro_real, prz_term_estudos1, -gasto_estudo1, 0) * 12
             st.metric(nome_filho1, f'R$ {vlr_nec_educ1:.2f}', f'{prz_term_estudos1:.0f} anos restantes', delta_color='off')
         with col2:
             vlr_nec_educ2 = 0
             if idade_filho2 > 0:
-                idade_term_estudos2 = st.slider('Idade de Término os Estudos', min_value=17, max_value=100, value=24, step=1)
-                gasto_estudo2 = st.number_input('Custo Mensal com Educação')
+                idade_term_estudos2 = st.slider('Idade de Término com Dependente', min_value=17, max_value=100, value=24, step=1)
+                gasto_estudo2 = st.number_input('Custo Mensal')
                 prz_term_estudos2 = idade_term_estudos2 - idade_filho2
                 vlr_nec_educ2 = npf.pv(juro_real, prz_term_estudos2, -gasto_estudo2, 0) * 12
                 st.metric(nome_filho2, f'R$ {vlr_nec_educ2:.2f}',f'{prz_term_estudos2:.0f} anos restantes', delta_color='off')
         with col3:
             vlr_nec_educ3 = 0
             if idade_filho3 > 0:
-                idade_term_estudos3 = st.slider('Idade de Término os Estudos', min_value=17, max_value=100, value=24, step=1)
-                gasto_estudo3 = st.number_input('Custo Mensal com Educação')
+                idade_term_estudos3 = st.slider('Idade de Término com Dependente', min_value=17, max_value=100, value=24, step=1)
+                gasto_estudo3 = st.number_input('Custo Mensal')
                 prz_term_estudos3 = idade_term_estudos3 - idade_filho3
                 vlr_nec_educ3 = npf.pv(juro_real, prz_term_estudos3, -gasto_estudo3, 0) * 12
                 st.metric(nome_filho3, f'R$ {vlr_nec_educ3:.2f}',f'{prz_term_estudos3:.0f} anos restantes', delta_color='off')
         with col4:
             vlr_nec_educ4 = 0
             if idade_filho4 > 0:
-                idade_term_estudos4 = st.slider('Idade de Término os Estudos', min_value=17, max_value=100, value=24, step=1)
-                gasto_estudo4 = st.number_input('Custo Mensal com Educação')
+                idade_term_estudos4 = st.slider('Idade de Término com Dependente', min_value=17, max_value=100, value=24, step=1)
+                gasto_estudo4 = st.number_input('Custo Mensal')
                 prz_term_estudos4 = idade_term_estudos4 - idade_filho4
                 vlr_nec_educ4 = npf.pv(juro_real, prz_term_estudos4, -gasto_estudo4, 0) * 12
                 st.metric(nome_filho4, f'R$ {vlr_nec_educ4:.2f}',f'{prz_term_estudos4:.0f} anos restantes', delta_color='off')
         custo_educacao = vlr_nec_educ1 + vlr_nec_educ2 + vlr_nec_educ3 + vlr_nec_educ4
-        st.metric('Custo Total Com Educação', f'R$ {custo_educacao:.2f}')
+        st.metric('Custo Total Com Dependentes', f'R$ {custo_educacao:.2f}')
         st.markdown('---')
     
     
@@ -918,6 +1008,9 @@ if patrim_acumulado > 0:
 
     perfil_comportamental = st.text_area('Aspectos comportamentais e pessoais do cliente')
     perfil_tecnico = st.text_area('Aspectos técnicos e específicos do cliente')
+    demais_info = st.text_area('Informações complementares')
+    conclusao = st.text_area('Conclusão')
+    proximos_passos = st.text_area('Próximos Passos')
     st.markdown('---')
 
     pdf = gerar_pdf(fig_receita, fig_rec_desp, fig_patr, fig_ger_risco, fig_consol)

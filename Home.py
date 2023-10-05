@@ -14,11 +14,11 @@ def main():
             Page('pages/Magic Formula.py', 'Magic Formula', '🎯'),
             Page('pages/Calculadora.py', 'Calculadora Financeira', '🧮'),
             Page('pages/value_investing.py', 'Value Investing', '🔎'),
+            Page('pages/fundos_investimentos.py', 'Mapa de Fundos de Investimentos', '🪙'),
             Section('PMF', '👨🏻‍💻'),
             Page('pages/Fundamentos.py', 'Fundamentos', '📊'),
             Page('pages/Panorama de Mercado.py', 'Panorama de Mercado', '📰'),
             Page('pages/Rentabilidades Mensais.py', 'Rentabilidades Mensais', '📈')
-            # Unless you explicitly say in_section=False
         ]
     )
 
