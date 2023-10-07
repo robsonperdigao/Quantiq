@@ -62,11 +62,11 @@ for coluna in ['Cotacao', 'PL', 'PVP', 'LPA', 'VPA']:
 dados_ativo = dados_ativo[['Cotacao', 'PL', 'PVP', 'LPA', 'VPA']]
 
 col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
-cotacao = float(dados_ativo['Cotacao'])
-pl_ativo = float(dados_ativo['PL'])
-pvp_ativo = float(dados_ativo['PVP'])
-lpa = float(dados_ativo['LPA'])
-vpa = float(dados_ativo['VPA'])
+cotacao = float(dados_ativo['Cotacao'].iloc[0])
+pl_ativo = float(dados_ativo['PL'].iloc[0])
+pvp_ativo = float(dados_ativo['PVP'].iloc[0])
+lpa = float(dados_ativo['LPA'].iloc[0])
+vpa = float(dados_ativo['VPA'].iloc[0])
 indice_graham_ativo = round(pl_ativo * pvp_ativo, 2)
 valor_intrinseco = round((indice * lpa * vpa) ** (1 / 2), 2)
 
