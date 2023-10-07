@@ -23,7 +23,7 @@ def lista_empresas():
     return df
 
 st.set_page_config(page_title='Faça Fortuna com Ações - Décio Bazin',
-                    page_icon='🔎',
+                    page_icon='🎯',
                     layout='wide')
 
 st.title('Faça Fortuna com Ações - Décio Bazin')

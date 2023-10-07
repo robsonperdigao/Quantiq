@@ -11,10 +11,11 @@ def main():
         [
             Page('Home.py', 'Home', '🏠'),
             Page('pages/Raio-X Financeiro.py', 'Raio-X Financeiro', '📊'),
+            Page('pages/analise_portfolio.py', 'Análise de Carteira', '📈'),
             Page('pages/Calculadora.py', 'Calculadora Financeira', '🧮'),
-            Page('pages/Magic Formula.py', 'Magic Formula', '🎯'),
+            Page('pages/Magic Formula.py', 'Magic Formula', '🪄'),
             Page('pages/value_investing.py', 'Ben Graham - Value Investing', '🔎'),
-            Page('pages/fortuna_acoes.py', 'Método Bazin', '🔎'),
+            Page('pages/fortuna_acoes.py', 'Método Bazin', '🎯'),
             Page('pages/fundos_investimentos.py', 'Mapa de Fundos de Investimentos', '🪙'),
             Section('PMF', '👨🏻‍💻'),
             Page('pages/Fundamentos.py', 'Fundamentos', '📊'),

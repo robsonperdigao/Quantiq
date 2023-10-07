@@ -12,3 +12,4 @@ numpy_financial
 datetime
 fpdf
 st-pages
+quantstats

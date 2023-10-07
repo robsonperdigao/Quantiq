@@ -90,7 +90,7 @@ def dados_ativo(papel):
             st.write('**Último Balanço Processado:**', info_papel['Ult_balanco_processado'][0]) 
 
 st.set_page_config(page_title='Magic Formula', 
-                   page_icon='🎯',
+                   page_icon='🪄',
                    layout='wide')
 st.title('Magic Formula')
 st.write("""Em 'The Little Book That Beats the Market' (A Fórmula Mágica de Joel Greenblatt para bater o mercado de ações, tradução para o Brasil), Joel Greenblatt compartilha uma estratégia de investimento que desafia a sabedoria convencional de Wall Street. Sua abordagem gira em torno da chamada "fórmula mágica", uma fórmula simples que utiliza dois critérios-chave para selecionar ações. 
