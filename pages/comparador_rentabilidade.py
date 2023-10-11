@@ -57,6 +57,7 @@ def comparativo(key):
                     tx = tx_pre + ipca_ano
                     vlr_bruto, lucro, ir, lucro_liquido, vlr_liq_resgate, rent_liq = calcula_retorno(ativo, vlr, prazo, tx)
     with st.container():
+        col1, col2, col3 = st.columns(3)
         with col1:
             st.metric('Valor bruto', f'R$ {vlr_bruto:.2f}')
             st.metric('Lucro líquido', f'R$ {lucro_liquido:.2f}')
