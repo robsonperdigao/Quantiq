@@ -24,6 +24,8 @@ Através desse raio-X financeiro você terá uma visão clara e estratégica de 
 
 Preencha as informações abaixo:""")
 st.markdown('---')
+
+
 @st.cache_data
 def calcula_idade(nascimento): 
     hoje = date.today() 
@@ -150,43 +152,53 @@ def lista_empresas():
 
     return list(df['Papel'])
 
+@st.cache_data
+def lista_fiis():
+    url = 'https://fundamentus.com.br/fii_resultado.php'
+    header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201',
+            'Accept': 'text/html, text/plain, text/css, text/sgml, */*;q=0.01',
+            'Accept-Encoding': 'gzip, deflate',
+            }
+    r = requests.get(url, headers=header)
+    df = pd.read_html(r.text)[0]
+    return list(df['Papel'])
+
 @st.cache_data(experimental_allow_widgets=True)
 def categoria_invest(categoria, key): 
-        lista_acoes =  [i + '.SA' for i in lista_empresas()]     
-        match categoria:
-            case 'Ações':
-                carteira_acoes = st.multiselect('Selecione o(s) papel(is)', lista_acoes, placeholder='Digite o ticker', key=f'acoes{key}')
-            case 'FIIs':
-                carteira_fiis = st.multiselect('Selecione o(s) papel(is)', ['HGLG11', 'MXRF11'], placeholder='Digite o ticker', key=f'fii{key}')
-            case 'Renda Fixa':
-                carteira_renda_fixa = st.text_input('Digite o(s) ativo(s)', key=f'rf{key}')
-            case 'Tesouro Direto':
-                carteira_tesouro = st.text_input('Digite o(s) ativo(s)', key=f'td{key}')
-            case 'Fundos de Ações':
-                carteira_fundos_acoes = st.text_input('Digite o(s) nome(s) do(s) fundo(s)', key=f'fnd_acoes{key}')
-            case 'Fundos de Renda Fixa':
-                carteira_fundos_rf = st.text_input('Digite o(s) nome(s) do(s) fundo(s)', key=f'fnd_rf{key}')
-            case 'Fundos Multimercados':
-                carteira_fundos_mult = st.text_input('Digite o(s) nome(s) do(s) fundo(s)', key=f'fnd_mult{key}')
-            case 'Moeda':
-                carteira_moeda = st.text_input('Digite a(s) moeda(s)', key=f'moeda{key}')
-            case 'Cripto':
-                carteira_cripto = st.text_input('Digite o(s) ativo(s)', key=f'cripto{key}')
-            case 'ETFs':
-                carteira_etf = st.text_input('Digite o(s) ativo(s)', key=f'etf{key}')
-            case 'Stocks':
-                carteira_stocks = st.text_input('Digite o(s) ativo(s)', key=f'stocks{key}')
-            case 'REITs':
-                carteira_reits = st.text_input('Digite o(s) ativo(s)', key=f'reits{key}')
-            case 'Bonds':
-                carteira_bonds = st.text_input('Digite o(s) ativo(s)', key=f'bonds{key}')
-            case 'Treasures':
-                carteira_treasures = st.text_input('Digite o(s) ativo(s)', key=f'treasures{key}')
-            case 'Funds':
-                carteira_funds = st.text_input('Digite o(s) ativo(s)', key=f'funds{key}')
-            case 'Mutual Funds':
-                carteira_mutual_funds = st.text_input('Digite o(s) ativo(s)', key=f'mutual_funds{key}')
-        return
+    match categoria:
+        case 'Ações':
+            carteira_acoes = st.multiselect('Selecione o(s) papel(is)', lista_empresas(), placeholder='Digite o ticker', key=f'acoes{key}')
+        case 'FIIs':
+            carteira_fiis = st.multiselect('Selecione o(s) papel(is)', lista_fiis(), placeholder='Digite o ticker', key=f'fii{key}')
+        case 'Renda Fixa':
+            carteira_renda_fixa = st.text_input('Digite o(s) ativo(s)', key=f'rf{key}')
+        case 'Tesouro Direto':
+            carteira_tesouro = st.text_input('Digite o(s) ativo(s)', key=f'td{key}')
+        case 'Fundos de Ações':
+            carteira_fundos_acoes = st.text_input('Digite o(s) nome(s) do(s) fundo(s)', key=f'fnd_acoes{key}')
+        case 'Fundos de Renda Fixa':
+            carteira_fundos_rf = st.text_input('Digite o(s) nome(s) do(s) fundo(s)', key=f'fnd_rf{key}')
+        case 'Fundos Multimercados':
+            carteira_fundos_mult = st.text_input('Digite o(s) nome(s) do(s) fundo(s)', key=f'fnd_mult{key}')
+        case 'Moeda':
+            carteira_moeda = st.text_input('Digite a(s) moeda(s)', key=f'moeda{key}')
+        case 'Cripto':
+            carteira_cripto = st.text_input('Digite o(s) ativo(s)', key=f'cripto{key}')
+        case 'ETFs':
+            carteira_etf = st.text_input('Digite o(s) ativo(s)', key=f'etf{key}')
+        case 'Stocks':
+            carteira_stocks = st.text_input('Digite o(s) ativo(s)', key=f'stocks{key}')
+        case 'REITs':
+            carteira_reits = st.text_input('Digite o(s) ativo(s)', key=f'reits{key}')
+        case 'Bonds':
+            carteira_bonds = st.text_input('Digite o(s) ativo(s)', key=f'bonds{key}')
+        case 'Treasures':
+            carteira_treasures = st.text_input('Digite o(s) ativo(s)', key=f'treasures{key}')
+        case 'Funds':
+            carteira_funds = st.text_input('Digite o(s) ativo(s)', key=f'funds{key}')
+        case 'Mutual Funds':
+            carteira_mutual_funds = st.text_input('Digite o(s) ativo(s)', key=f'mutual_funds{key}')
+    return
 
 class PDFWithFooter(FPDF):
     def header(self):
