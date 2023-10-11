@@ -11,6 +11,7 @@ def main():
         [
             Page('home.py', 'Home', '🏠'),
             Page('pages/Raio-X Financeiro.py', 'Raio-X Financeiro', '📊'),
+            Page('docs/fpclient.py', 'Exemplo FPClient', '📝'),
             Page('pages/comparativo_renda_fixa.py', 'Comparativo de Rentabilidade', '🏅'),
             Page('pages/analise_portfolio.py', 'Análise de Carteira', '📈'),
             Page('pages/calculadora.py', 'Calculadora Financeira', '🧮'),
@@ -34,7 +35,7 @@ def main():
         st.markdown('# Robson Perdigão')
         st.markdown('## Assessor de Investimentos')
         st.write("[InvestSmart](https://investsmart.com.br/robson-perdigao/)")
-        st.write(" LinkedIn: [@robsonperdigao]('https://www.linkedin.com/in/robsonperdigao/')")
+        st.write(" LinkedIn: [@robsonperdigao](https://www.linkedin.com/in/robsonperdigao/)")
     st.write("""Me chamo Robson Perdigão, sou Assessor de Investimentos na InvestSmart.
                     Investidor desde 2012, trader desde 2018 e Assessor desde 2020.
                     2023 foi o ano para entrar no mundo das Finanças Quantitativas com o objetivo de melhorar a performance dos meus investimentos e auxiliar os investidores a tomar melhores decisões.""")
@@ -45,14 +46,14 @@ def main():
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.success(" Linktree: [@perdigao]('https://linktr.ee/perdigao')", icon='📱')
-        st.success(" GitHub: [@robsonperdigao]('https://github.com/robsonperdigao')", icon='🤖')
+        st.success(" Linktree: [@perdigao](https://linktr.ee/perdigao)", icon='📱')
+        st.success(" GitHub: [@robsonperdigao](https://github.com/robsonperdigao)", icon='🤖')
     with col2:    
-        st.info(" LinkedIn: [@robsonperdigao]('https://www.linkedin.com/in/robsonperdigao/')", icon='🧔🏻‍♂️')
-        st.error(" YouTube: [@robson.perdigao]('https://www.youtube.com/@robson.perdigao')", icon='📹')
+        st.info(" LinkedIn: [@robsonperdigao](https://www.linkedin.com/in/robsonperdigao/)", icon='🧔🏻‍♂️')
+        st.error(" YouTube: [@robson.perdigao](https://www.youtube.com/@robson.perdigao)", icon='📹')
         st.warning(" [Abra sua conta](https://bit.ly/rp_abrirconta) na XP Investimentos e tenha a minha assessoria")
     with col3:
-        st.info(" TikTok: [@robson.perdigao]('https://www.tiktok.com/@robson.perdigao')", icon='🤳🏻')
-        st.warning(" Instagram: [@robson.perdigao]('https://www.instagram.com/robson.perdigao/')", icon='📸')
+        st.info(" TikTok: [@robson.perdigao](https://www.tiktok.com/@robson.perdigao)", icon='🤳🏻')
+        st.warning(" Instagram: [@robson.perdigao](https://www.instagram.com/robson.perdigao/)", icon='📸')
 
 main()
