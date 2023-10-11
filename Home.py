@@ -13,15 +13,15 @@ def main():
             Page('pages/Raio-X Financeiro.py', 'Raio-X Financeiro', '📊'),
             Page('pages/comparativo_renda_fixa.py', 'Comparativo de Rentabilidade', '🏅'),
             Page('pages/analise_portfolio.py', 'Análise de Carteira', '📈'),
-            Page('pages/Calculadora.py', 'Calculadora Financeira', '🧮'),
-            Page('pages/Magic Formula.py', 'Magic Formula', '🪄'),
+            Page('pages/calculadora.py', 'Calculadora Financeira', '🧮'),
+            Page('pages/magic-formula.py', 'Magic Formula', '🪄'),
             Page('pages/value_investing.py', 'Ben Graham - Value Investing', '🔎'),
             Page('pages/fortuna_acoes.py', 'Método Bazin', '🎯'),
             Page('pages/fundos_investimentos.py', 'Mapa de Fundos de Investimentos', '🪙'),
             Section('PMF', '👨🏻‍💻'),
-            Page('pages/Fundamentos.py', 'Fundamentos', '📊'),
-            Page('pages/Panorama de Mercado.py', 'Panorama de Mercado', '📰'),
-            Page('pages/Rentabilidades Mensais.py', 'Rentabilidades Mensais', '📈')
+            Page('pages/fundamentos.py', 'Fundamentos', '📊'),
+            Page('pages/panorama-mercado.py', 'Panorama de Mercado', '📰'),
+            Page('pages/mapa-retornos.py', 'Mapa de Retornos Mensais', '📈')
         ]
     )
 
@@ -29,7 +29,7 @@ def main():
     col1, col2, col3, col4 = st.columns(4)
     st.markdown('---')
     with col1:
-        st.image('foto_perfil.png')
+        st.image('img/foto_perfil.png')
     with col2:
         st.markdown('# Robson Perdigão')
         st.markdown('## Assessor de Investimentos')

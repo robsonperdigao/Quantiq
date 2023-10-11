@@ -47,9 +47,8 @@ with tab1:
     carteira = qs.utils.download_returns(acao)
     carteira
     col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        relatorio = qs.reports.html(carteira, output='teste')
-        st.components.v1.html(relatorio, height=600, width=800)
+    
+        
         
 with tab2:
     acoes= st.multiselect('Ativo da carteira', [i + '.SA' for i in fd.list_papel_all()], placeholder='Digite o nome da ação')

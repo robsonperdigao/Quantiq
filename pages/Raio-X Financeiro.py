@@ -189,7 +189,7 @@ def categoria_invest(categoria, key):
 
 class PDFWithFooter(FPDF):
     def header(self):
-        self.image('logo_investsmart.png', x=65, y=5, w=84, h=22)
+        self.image('img/logo_investsmart.png', x=65, y=5, w=84, h=22)
         
     def footer(self):
         self.set_y(-15)
