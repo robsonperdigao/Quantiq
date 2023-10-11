@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 import numpy_financial as npf
 from datetime import date
+import nasdaqdatalink
+
+nasdaq_api_key = 'yUkkodwj1uqL1EPc1kdS'
+nasdaqdatalink.ApiConfig.api_key = nasdaq_api_key
 
 def consulta_bc(codigo_bcb, data_ini = '01/01/1900', data_fim = date.today().strftime('%d/%m/%Y')):
   url = f'http://api.bcb.gov.br/dados/serie/bcdata.sgs.{codigo_bcb}/dados?formato=json&dataInicial={data_ini}&dataFinal={data_fim}'
@@ -69,6 +73,16 @@ def comparativo(key):
             st.metric('Rentabilidade líquida', f'{rent_liq:.2f}%')   
     return ativo, vlr_liq_resgate, rent_liq
 
+@st.cache_data
+def calcula_indicadores():
+    #selic_ano = float(consulta_bc(432).iloc[-1].values)
+    #cdi_ano = float(consulta_bc(1178).iloc[-1:].values)
+    #ipca_ano = round(float(consulta_bc(433).iloc[-12:].sum().values), 2)
+    selic_ano = float(nasdaqdatalink.get('BCB/432', collapse='monthly').iloc[-1])
+    cdi_ano = float(nasdaqdatalink.get('BCB/1178', collapse='monthly').iloc[-1])
+    ipca_ano = float(nasdaqdatalink.get('BCB/13522', collapse='monthly').iloc[-1])
+    return selic_ano, cdi_ano, ipca_ano
+
     
 st.set_page_config(page_title='Comparador de Rentabilidade',
                     page_icon='🏅',
@@ -77,18 +91,16 @@ st.set_page_config(page_title='Comparador de Rentabilidade',
 st.title('Comparador de Rentabilidade')
 st.markdown('---')
 
-with st.spinner('Buscando dados atualizados...'):
-    with st.container():
-        col1, col2, col3 = st.columns(3)
-        selic_ano = float(consulta_bc(432).iloc[-1].values)
-        cdi_ano = float(consulta_bc(1178).iloc[-1:].values)
-        ipca_ano = round(float(consulta_bc(433).iloc[-12:].sum().values), 2)
-        with col1:
-            st.metric('Selic Anual', f'{selic_ano:.2f}%')
-        with col2:
-            st.metric('CDI Anual', f'{cdi_ano:.2f}%')
-        with col3:
-            st.metric('IPCA Anual', f'{ipca_ano:.2f}%')
+
+selic_ano, cdi_ano, ipca_ano = calcula_indicadores()
+with st.container():
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric('Selic Anual', f'{selic_ano:.2f}%')
+    with col2:
+        st.metric('CDI Anual', f'{cdi_ano:.2f}%')
+    with col3:
+        st.metric('IPCA Anual', f'{ipca_ano:.2f}%')
         
 with st.container():
     col1, col2, col3 = st.columns(3)
