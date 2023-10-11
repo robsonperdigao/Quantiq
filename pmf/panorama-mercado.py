@@ -30,6 +30,8 @@ st.set_page_config(page_title='Panorama de Mercado',
                    layout='wide')
 st.title('Panorama do Mercado')
 st.markdown('---')
+
+
 st.markdown(date.today().strftime('%d/%m/%Y'))
 
 #Mercados pelo mundo

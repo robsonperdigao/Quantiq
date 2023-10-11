@@ -9,18 +9,18 @@ st.write('Exemplo do FPClient preenchido e abaixo o PDF do Diagnóstico do Clien
 
 st.markdown('---')
 
-st.image('docs/fp1.png')
-st.image('docs/fp2.png')
-st.image('docs/fp3.png')
-st.image('docs/fp4.png')
-st.image('docs/fp5.png')
-st.image('docs/fp6.png')
-st.image('docs/fp7.png')
-st.image('docs/fp8.png')
-st.image('docs/fp9.png')
-st.image('docs/fp10.png')
+st.image('is/docs/fp1.png')
+st.image('is/docs/fp2.png')
+st.image('is/docs/fp3.png')
+st.image('is/docs/fp4.png')
+st.image('is/docs/fp5.png')
+st.image('is/docs/fp6.png')
+st.image('is/docs/fp7.png')
+st.image('is/docs/fp8.png')
+st.image('is/docs/fp9.png')
+st.image('is/docs/fp10.png')
 
-with open('docs/diagnostico.pdf', 'rb') as file:
+with open('is/docs/diagnostico.pdf', 'rb') as file:
     btn = st.download_button(
             label='Baixe o PDF do Diagnóstico do Cliente',
             data=file,

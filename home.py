@@ -11,18 +11,18 @@ def main():
         [
             Page('home.py', 'Home', '🏠'),
             Page('pages/Raio-X Financeiro.py', 'Raio-X Financeiro', '📊'),
-            Page('docs/fpclient.py', 'Exemplo FPClient', '📝'),
-            Page('pages/comparativo_renda_fixa.py', 'Comparativo de Rentabilidade', '🏅'),
-            Page('pages/analise_portfolio.py', 'Análise de Carteira', '📈'),
+            Page('is/docs/fpclient.py', 'Exemplo FPClient', '📝'),
+            Page('pages/comparador_rentabilidade.py', 'Comparador de Rentabilidade', '🏅'),
+            #Page('quant/analise_portfolio.py', 'Análise de Carteira', '📈'),
             Page('pages/calculadora.py', 'Calculadora Financeira', '🧮'),
             Page('pages/magic-formula.py', 'Magic Formula', '🪄'),
             Page('pages/value_investing.py', 'Ben Graham - Value Investing', '🔎'),
             Page('pages/fortuna_acoes.py', 'Método Bazin', '🎯'),
             Page('pages/fundos_investimentos.py', 'Mapa de Fundos de Investimentos', '🪙'),
             Section('PMF', '👨🏻‍💻'),
-            Page('pages/fundamentos.py', 'Fundamentos', '📊'),
-            Page('pages/panorama-mercado.py', 'Panorama de Mercado', '📰'),
-            Page('pages/mapa-retornos.py', 'Mapa de Retornos Mensais', '📈')
+            Page('pmf/fundamentos.py', 'Fundamentos', '📊'),
+            Page('pmf/panorama-mercado.py', 'Panorama de Mercado', '📰'),
+            Page('pmf/mapa-retornos.py', 'Mapa de Retornos Mensais', '📈')
         ]
     )
 
