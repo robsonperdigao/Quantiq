@@ -30,6 +30,7 @@ st.title('Faça Fortuna com Ações - Décio Bazin')
 st.write('''Baseado no livro "Faça fortuna com ações antes que seja tarde", Décio Bazin descreve sua trajetória, histórias e como escolher boas empresas para se investir. 
 No livro, o autor ensina que comprar uma ação é como comprar a fração de uma empresa. Dessa forma, ele ensina quais critérios observar em uma empresa, como dividendos acima de 6%, baixo endividamento e estar fora de escândalos.''')
 st.write('***Lembrando que os ativos aqui listados não são recomendação de investimentos.***')
+st.markdown('---')
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:

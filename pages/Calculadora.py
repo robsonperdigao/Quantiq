@@ -6,6 +6,10 @@ st.set_page_config(page_title='Calculadora Financeira',
                    layout='wide')
 st.title('Calculadora Financeira')
 
+st.write('Utilize as calculadoras abaixo para converter taxas de juros, tempo de investimento, calcular independência financeira e mais.')
+st.markdown('---')
+
+
 col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     juros = st.checkbox('Converte Taxa de Juros Mensal', True)
@@ -44,9 +48,9 @@ with st.container():
             st.subheader('Descobrir Taxa de Juros')
             ptr_fv = st.number_input('Insira o valor futuro')
             ptr_pv = st.number_input('Insira o valor atual, caso haja')
-            ptr_pmt = st.number_input('Insira o valor do aporte')
-            ptr_n = st.number_input('Insira o período de cálculo', step=1)
-            descob_taxa = npf.rate(ptr_n, -ptr_pmt, -ptr_pv, ptr_fv)
+            ptr_pmt = st.number_input('Insira o valor do aporte anual')
+            ptr_n = st.number_input('Insira o prazo (em anos)', step=1)
+            descob_taxa = npf.rate(ptr_n, -ptr_pmt, -ptr_pv, ptr_fv) * 100
             st.write(f'Taxa de juros no período {descob_taxa:.2f}%')
 st.markdown('---')
 
@@ -57,7 +61,7 @@ with st.container():
             st.subheader('Descobrir Valor de Aporte Único')
             apu_fv = st.number_input('Insira o valor futuro', key='apu_fv')
             apu_i = st.number_input('Insira a taxa de juros no período', key='apu_i') / 100
-            apu_n = st.number_input('Insira o período', key='apu_n')
+            apu_n = st.number_input('Insira o período', step=1, key='apu_n')
             vlr_aporte = npf.pv(apu_i, apu_n, 0, -apu_fv,)
             st.write(f'Valor de Aporte Único R$ {vlr_aporte:.2f}')
 
@@ -67,7 +71,7 @@ with st.container():
             apr_fv = st.number_input('Insira o valor futuro', key='apr_fv')
             apr_pv = st.number_input('Insira o patrimônio atual, caso haja')
             apr_i = st.number_input('Insira a taxa de juros no período', key='apr_i') / 100
-            apr_n = st.number_input('Insira o período', key='apr_n')
+            apr_n = st.number_input('Insira o período', step=1, key='apr_n')
             vlr_aprt_recorr = npf.pmt(apr_i, apr_n, -apr_pv, -apr_fv)
             st.write(f'Valor de Aportes Recorrentes R$ {vlr_aprt_recorr:.2f}')
 

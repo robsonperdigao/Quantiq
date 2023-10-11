@@ -103,6 +103,7 @@ st.write("""O autor também enfatiza a importância de manter uma perspectiva de
 st.write('Eu fiz questão de adaptar a Fórmula Mágica para o mercado brasileiro e deixar de forma ainda mais simples a obtenção das ações de acordo com os critérios do livro.')
 st.write('***Lembrando que os ativos aqui listados não são recomendação de investimentos.***')
 st.write("""Altere os critérios abaixo conforme sua vontade, os valores padrões já consideram o recomendado no livro.""")
+st.markdown('---')
 
 liquidez = st.slider('Qual a liquidez mínima desejada? (Ideal maior que 1.000.000)', 100000, 5000000, value=1000000, step=100000)
 qtd_ativos = st.slider('Quantos ativos você deseja no Ranking Final?', 3, 30, value=15)

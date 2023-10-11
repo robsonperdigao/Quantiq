@@ -13,3 +13,4 @@ datetime
 fpdf
 st-pages
 quantstats
+IPython

@@ -42,7 +42,7 @@ st.set_page_config(page_title='Mapa de Fundos de Investimentos',
                     layout='wide')
 
 st.title('Mapa de Fundos de Investimentos')
-
+st.markdown('---')
 
 col1, col2, col3 = st.columns(3)
 with col1:

@@ -31,7 +31,9 @@ st.set_page_config(page_title='Mapa de Retornos Mensais',
                    page_icon='📈',
                    layout='wide')
 st.title('Mapa de Retornos Mensais')
-    
+st.markdown('---')
+
+
 opcao = st.radio('Selecione', ['Índices', 'Ações'])
 col1, col2 = st.columns(2)
 with col1:

@@ -5,6 +5,7 @@ st.set_page_config(page_title='Análise Fundamentalista',
                    page_icon='📊',
                    layout='wide')
 st.title('Análise Fundamentalista')
+st.markdown('---')
 
 def dados_ativo(papel):
     info_papel = fd.get_detalhes_papel(papel)

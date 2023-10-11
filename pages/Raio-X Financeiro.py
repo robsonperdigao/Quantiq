@@ -23,7 +23,7 @@ Futuramente será incluída a funcionalidade de Asset Alocation, que é basicame
 Através desse raio-X financeiro você terá uma visão clara e estratégica de suas finanças, permitindo que tome decisões informadas e trabalhe em direção a um futuro financeiro sólido e seguro. Estou aqui para ajudá-lo a alcançar seus objetivos financeiros com confiança e clareza.
 
 Preencha as informações abaixo:""")
-
+st.markdown('---')
 @st.cache_data
 def calcula_idade(nascimento): 
     hoje = date.today() 

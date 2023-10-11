@@ -1,8 +1,10 @@
 import streamlit as st
 
-st.set_page_config(page_title='Comparativo de Renda Fixa',
-                    page_icon='🔎',
+st.set_page_config(page_title='Algotrading | Automações de Estratégias',
+                    page_icon='🤖',
                     layout='wide')
 
-st.title('Comparativo de Renda Fixa')
+st.title('Algotrading | Automações de Estratégias')
+
+st.markdown('---')
 

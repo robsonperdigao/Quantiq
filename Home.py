@@ -11,6 +11,7 @@ def main():
         [
             Page('Home.py', 'Home', '🏠'),
             Page('pages/Raio-X Financeiro.py', 'Raio-X Financeiro', '📊'),
+            Page('pages/comparativo_renda_fixa.py', 'Comparativo de Rentabilidade', '🏅'),
             Page('pages/analise_portfolio.py', 'Análise de Carteira', '📈'),
             Page('pages/Calculadora.py', 'Calculadora Financeira', '🧮'),
             Page('pages/Magic Formula.py', 'Magic Formula', '🪄'),
