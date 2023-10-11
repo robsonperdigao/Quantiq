@@ -9,7 +9,7 @@ def main():
 
     show_pages(
         [
-            Page('Home.py', 'Home', '🏠'),
+            Page('home.py', 'Home', '🏠'),
             Page('pages/Raio-X Financeiro.py', 'Raio-X Financeiro', '📊'),
             Page('pages/comparativo_renda_fixa.py', 'Comparativo de Rentabilidade', '🏅'),
             Page('pages/analise_portfolio.py', 'Análise de Carteira', '📈'),
