@@ -1,28 +1,36 @@
 import streamlit as st
-from st_pages import Page, Section, show_pages
+from st_pages import Page, Section, show_pages, add_indentation
  
 def main():
     st.set_page_config(page_title='Robson Perdigão - Finanças Quantitativas',
                         page_icon='📈',
                         initial_sidebar_state='expanded',
                         layout='wide')
+    #add_indentation()
 
     show_pages(
         [
             Page('home.py', 'Home', '🏠'),
-            Page('pages/Raio-X Financeiro.py', 'Raio-X Financeiro', '📊'),
-            Page('is/docs/fpclient.py', 'Exemplo FPClient', '📝'),
+            #Section("Planejamento", '📊'),
+            Page('pages/x-ray.py', 'Raio-X Financeiro', '📊'),
+            Page('pages/is/fpclient.py', 'Exemplo FPClient', '📝'),
+            #Section("Quantiq", '💲'),
             Page('pages/comparador_rentabilidade.py', 'Comparador de Rentabilidade', '🏅'),
-            #Page('quant/analise_portfolio.py', 'Análise de Carteira', '📈'),
+            #Page('pages/quant/analise_portfolio.py', 'Análise de Carteira', '📈'),
+            #Page('pages/quant/analise_setorial.py', 'Análise Setorial', '🗄️'),
+            #Page('pages/quant/algotrading.py', 'Algotrading/Robô Trader', '🗄️'),
+            #Page('pages/quant/factor_investing.py', 'Factor Investing', '🗄️'),
+            #Page('pages/quant/quant_finance.py', 'Finanças Quantitativas', '🗄️'),
             Page('pages/calculadora.py', 'Calculadora Financeira', '🧮'),
             Page('pages/magic-formula.py', 'Magic Formula', '🪄'),
             Page('pages/value_investing.py', 'Ben Graham - Value Investing', '🔎'),
             Page('pages/fortuna_acoes.py', 'Método Bazin', '🎯'),
             Page('pages/fundos_investimentos.py', 'Mapa de Fundos de Investimentos', '🪙'),
-            Section('PMF', '👨🏻‍💻'),
-            Page('pmf/fundamentos.py', 'Fundamentos', '📊'),
-            Page('pmf/panorama-mercado.py', 'Panorama de Mercado', '📰'),
-            Page('pmf/mapa-retornos.py', 'Mapa de Retornos Mensais', '📈')
+            #Page('pages/quant/remuneracao.py', 'Remuneração', '🗄️'),
+            #Section("PMF", '👨🏻‍💻'),
+            Page('pages/pmf/fundamentos.py', 'Fundamentos', '📊'),
+            Page('pages/pmf/panorama-mercado.py', 'Panorama de Mercado', '📰'),
+            Page('pages/pmf/mapa-retornos.py', 'Mapa de Retornos Mensais', '📈')
         ]
     )
 
