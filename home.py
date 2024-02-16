@@ -15,6 +15,7 @@ def main():
             Page('pages/x-ray.py', 'Raio-X Financeiro', '📊'),
             Page('pages/is/fpclient.py', 'Exemplo FPClient', '📝'),
             #Section("Quantiq", '💲'),
+            Page('pages/opcoes.py', 'Estratégias com Opções', '❇️'),
             Page('pages/comparador_rentabilidade.py', 'Comparador de Rentabilidade', '🏅'),
             #Page('pages/quant/analise_portfolio.py', 'Análise de Carteira', '📈'),
             #Page('pages/quant/analise_setorial.py', 'Análise Setorial', '🗄️'),
