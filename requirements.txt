@@ -14,4 +14,4 @@ fpdf
 st-pages
 quantstats
 IPython
-nasdaq-data-link
+workadays
