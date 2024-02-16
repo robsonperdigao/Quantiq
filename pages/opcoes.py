@@ -57,7 +57,7 @@ def collar_alta(ativo, vencimento, quantidade = 1):
     data_hoje = dt.date.today()
     dias_uteis = wd.networkdays(data_hoje, vencimento, country='BR')
     cdi_operacao = round(((1 + selic / 100) ** (dias_uteis / 252) - 1) * 100, 2)
-
+    
     # Coleta o preço do ativo com base no último fechamento
     preco_ativo = round(yf.download(ativo +'.SA', period='1d')['Adj Close'].iloc[-1], 2)
     
@@ -126,8 +126,10 @@ with col4:
     estruturas = ['Collar de Alta', 'Collar de Baixa']
     estrutura = st.selectbox('Selecione a estrutura', estruturas)
 
+#button = st.button('Ver as estratégias')
 st.write('')
 
+#if button:
 col1, col2, col3 = st.columns(3)
 with col1:
     tabela = st.checkbox('Ver todas as operações')
@@ -136,21 +138,25 @@ with col2:
 with col3:
     call = st.checkbox('Ver tabela das CALLs')
 
+
 with st.container():
     st.write('Lista de operações possíveis')
     if estrutura == 'Collar de Alta':
         df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade)
-        st.dataframe(df_op)
+        if len(df) == 0:
+            st.write('Não há estratégias disponíveis')
+        else:
+            st.dataframe(df_op)
 
-with st.container():
-    if tabela:
-        st.write('Tabela com todas as operações para o ativo')
-        st.dataframe(df)
-    if put:
-        st.write('Tabela com todas as PUTs do ativo')
-        st.dataframe(df_put)
-    if call:
-        st.write('Tabela com todas as CALLs do ativo')
-        st.dataframe(df_call)
+            with st.container():
+                if tabela:
+                    st.write('Tabela com todas as operações para o ativo')
+                    st.dataframe(df)
+                if put:
+                    st.write('Tabela com todas as PUTs do ativo')
+                    st.dataframe(df_put)
+                if call:
+                    st.write('Tabela com todas as CALLs do ativo')
+                    st.dataframe(df_call)
 
 st.markdown('---')
