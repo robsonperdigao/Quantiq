@@ -32,8 +32,8 @@ def lista_empresas():
 def opt_venc(ativo, vencimento):
     url = f'https://opcoes.net.br/listaopcoes/completa?idAcao={ativo}&listarVencimentos=false&cotacoes=true&vencimentos={vencimento}'
     r = requests.get(url).json()
-    x = ([ativo, vencimento, i[0].split('_')[0], i[2], i[3], i[5], i[8], i[9], i[10]] for i in r['data']['cotacoesOpcoes'])
-    df = pd.DataFrame(x, columns=['subjacente', 'vencimento', 'ativo', 'tipo', 'modelo', 'strike', 'preco', 'negocios', 'volume'])
+    x = ([ativo, vencimento, i[0].split('_')[0], i[2], i[3], i[5], i[8], i[9], i[10], i[11]] for i in r['data']['cotacoesOpcoes'])
+    df = pd.DataFrame(x, columns=['ativo', 'vencimento', 'ticker', 'tipo', 'modelo', 'strike', 'preco', 'negocios', 'volume', 'data ult'])
     return df
 
 # Coleta as opções com todos os vencimentos
@@ -45,7 +45,7 @@ def opt_all(ativo):
     return df
 
 # Operação - Collar de Alta
-def collar_alta(ativo, vencimento, quantidade = 1):
+def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1):
     # Coleta selic anual direto pelo BC
     url_selic = f'http://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados?formato=json'
     selic = pd.read_json(url_selic)
@@ -72,17 +72,18 @@ def collar_alta(ativo, vencimento, quantidade = 1):
     df_call_op = df_call.copy()
     df_call_op.drop(columns=['vencimento'], inplace=True)
     df_call_op.rename(columns={
-        'ativo': 'ativo_call',
+        'ticker': 'ticker_call',
         'tipo': 'tipo_call',
         'modelo': 'modelo_call',
         'strike': 'strike_call', 
         'preco': 'preco_call',
         'negocios': 'negocios_call',
-        'volume': 'volume_call'
+        'volume': 'volume_call',
+        'data ult': 'data ult_call'
     }, inplace=True)
 
     # Cria um dataframe com as operações possíveis para cada PUT
-    df = pd.merge(df_put, df_call_op, on='subjacente', suffixes=('', '_call'))
+    df = pd.merge(df_put, df_call_op, on='ativo', suffixes=('', '_call'))
     df = df[df['strike'] > preco_ativo]
     df['preco ativo'] = preco_ativo
     df['custo'] = (df['preco'] - df['preco_call'] + preco_ativo) * quantidade
@@ -97,6 +98,10 @@ def collar_alta(ativo, vencimento, quantidade = 1):
     df_op = df_op[df_op['lucro min pct'] >= cdi_operacao]
     df_op = df_op[df_op['lucro maximo'] > 0]
     df_op = df_op[df_op['strike_call'] > df_op['strike']]
+    df_op = df_op[df_op['volume'] >= volume_put]
+    df_op = df_op[df_op['negocios'] >= negocios_put]
+    df_op = df_op[df_op['volume_call'] >= volume_call]
+    df_op = df_op[df_op['negocios_call'] >= negocios_call]
     df_op = df_op.sort_values(by='lucro min pct',ascending=True)
     
     return df, df_put, df_call, df_op
@@ -115,16 +120,20 @@ with col1:
     ativos = lista_empresas()
     ativos.append('BOVA11')
     ativo = st.selectbox('Selecione o ativo', ativos, index=333)
+    volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999, 500, 100)
 
 with col2:
     vencimento = st.date_input('Data de vencimento das opções', format='DD/MM/YYYY')
+    negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 100000, 1, 1)
 
 with col3:
     quantidade = st.number_input('Quantidade', min_value=1, step=1, value=100)
+    volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999, 500, 100)
 
 with col4:
     estruturas = ['Collar de Alta', 'Collar de Baixa']
     estrutura = st.selectbox('Selecione a estrutura', estruturas)
+    negocios_call = st.slider('Quantidade mínima de negócios da CALL', 1, 100000, 1, 1)
 
 #button = st.button('Ver as estratégias')
 st.write('')
