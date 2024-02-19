@@ -119,7 +119,7 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     ativos = lista_empresas()
     ativos.append('BOVA11')
-    ativo = st.selectbox('Selecione o ativo', ativos, index=ativos[-1])
+    ativo = st.selectbox('Selecione o ativo', ativos)
     volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
 
 with col2:
