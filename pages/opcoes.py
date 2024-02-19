@@ -193,7 +193,6 @@ st.title('Estratégias de Opções')
 st.write('Selecione o ativo desejado e escolha a estrutura que pretende montar com opções e veja o resultado detalhado dos ativos.')
 st.markdown('---')
 
-"st.session_state object:", st.session_state
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
@@ -243,11 +242,11 @@ with st.container():
         st.write('Lista de operações possíveis')
         if estrutura == 'Collar de Alta':
             df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, 
-                                                    negocios_call, filtro_data, risco, corretagem_variavel, corretagem_ordem, key='collar_alta')
+                                                    negocios_call, filtro_data, risco, corretagem_variavel, corretagem_ordem)
             mostra_operacoes()
         elif estrutura == 'Collar de Baixa':
             df, df_put, df_call, df_op = collar_baixa(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, 
-                                                    negocios_call, filtro_data, risco, corretagem_variavel, corretagem_ordem, key='collar_baixa')
+                                                    negocios_call, filtro_data, risco, corretagem_variavel, corretagem_ordem)
             mostra_operacoes()
 
 st.markdown('---')
