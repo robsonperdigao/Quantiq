@@ -219,7 +219,14 @@ with st.expander('Filtros', expanded=True):
     with col4:
         negocios_call = st.slider('Quantidade mínima de negócios da CALL', 1, 1000, 1, 1)
     with col5:
-        filtro_data = st.date_input('Data último negócio', format='DD/MM/YYYY')
+        now = datetime.datetime.now()
+        if now.hour < 19:
+            # Se for antes das 19h, o valor padrão é o dia de ontem
+            default_date = now.date() - datetime.timedelta(days=1)
+        else:
+            # Se for depois das 19h, o valor padrão é o dia de hoje
+            default_date = now.date()
+        filtro_data = st.date_input('Data último negócio', default_date, format='DD/MM/YYYY')
 
 st.write('')
 button = st.button('Ver as estratégias')
