@@ -226,6 +226,10 @@ with st.expander('Filtros', expanded=True):
         else:
             # Se for depois das 19h, o valor padrão é o dia de hoje
             default_date = now.date()
+        # Ajustar o valor padrão se não for um dia útil
+        while not wd.is_workday(default_date, country="BR"):
+            # Subtrair um dia até encontrar um dia útil
+            default_date = default_date - dt.timedelta(days=1)
         filtro_data = st.date_input('Data último negócio', default_date, format='DD/MM/YYYY')
 
 st.write('')
