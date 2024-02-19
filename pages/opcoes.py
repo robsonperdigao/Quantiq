@@ -226,19 +226,18 @@ with col5:
     filtro_data = st.date_input('Data último negócio', format='DD/MM/YYYY')
 
 button = st.button('Ver as estratégias')
-st.write('')
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    tabela = st.checkbox('Ver todas as operações')
-with col2:
-    put = st.checkbox('Ver tabela das PUTs')
-with col3:
-    call = st.checkbox('Ver tabela das CALLs')
-
-
+st.markdown('---')
 with st.container():
     if button:
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            tabela = st.checkbox('Ver todas as operações')
+        with col2:
+            put = st.checkbox('Ver tabela das PUTs')
+        with col3:
+            call = st.checkbox('Ver tabela das CALLs')
+
         st.write('Lista de operações possíveis')
         if estrutura == 'Collar de Alta':
             df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, 
