@@ -216,14 +216,12 @@ with st.container():
                                 help='O valor padrão é o CDI até o vencimento da opção.\nAo definir o risco mínimo, será apresentado somente operações mais lucrativas (ou menos prejudiciais) que o valor escolhido.')
     with col2:
         negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
-        
-        st.write(f'Emolumentos B3: {tx_b3}% do volume')
+        corretagem_variavel = st.number_input('Taxa de corretagem variável da sua corretora', min_value=0.00, max_value=5.00, value=0.50)
     with col3:
         volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999.00, 500.00)
-        corretagem_variavel = st.number_input('Taxa de corretagem variável da sua corretora', min_value=0.00, max_value=5.00, value=0.50)
+        corretagem_ordem = st.number_input('Taxa de corretagem por ordem', min_value=0.00, max_value=100.00, value=2.90)
     with col4:
         negocios_call = st.slider('Quantidade mínima de negócios da CALL', 1, 1000, 1, 1)
-        corretagem_ordem = st.number_input('Taxa de corretagem por ordem', min_value=0.00, max_value=100.00, value=2.90)
     with col5:
         filtro_data = st.date_input('Data último negócio', format='DD/MM/YYYY')
 
