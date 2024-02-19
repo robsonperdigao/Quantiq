@@ -206,10 +206,9 @@ with st.container():
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
         volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
-        risco = st.number_input("Digite a % de risco aceitável pela operação", min_value=-100.00, value=calcula_cdi(vencimento), help='O valor padrão é o CDI até o vencimento da opção.')
+        risco = st.number_input("Digite a % de risco aceitável pela operação", min_value=-100.00, value=calcula_cdi(vencimento), help='O valor padrão é o CDI até o vencimento da opção.\nAo definir o risco mínimo, será apresentado somente operações mais lucrativas (ou menos prejudiciais) que o valor escolhido.')
     with col2:
-        negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
-        
+        negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)        
     with col3:
         volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999.00, 500.00)
     with col4:
