@@ -28,13 +28,13 @@ def lista_empresas():
 
     return list(df['Papel'])
 
-'''# Coleta as opções com todos os vencimentos
+# Coleta as opções com todos os vencimentos
 def opt_all(ativo):
     url = f'https://opcoes.net.br/listaopcoes/completa?idLista=ML&idAcao={ativo}&listarVencimentos=true&cotacoes=true'
     r = requests.get(url).json()
     vencimentos = [i['value'] for i in r['data']['vencimentos']]
-    df = pd.concat([opt_venc(ativo, vencimento) for vencimento in vencimentos])
-    return df'''
+    df = pd.concat([coleta_opcoes(ativo, vencimento) for vencimento in vencimentos])
+    return df
 
 # Mostrar tabela de operações
 def mostra_operacoes():
