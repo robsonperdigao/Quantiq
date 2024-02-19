@@ -204,19 +204,20 @@ with col4:
     estrutura = st.selectbox('Selecione a estrutura', estruturas)
     negocios_call = st.slider('Quantidade mínima de negócios da CALL', 1, 1000, 1, 1)
 
-st.write('')
-st.write('Filtros')
-col1, col2, col3, col4, col5 = st.columns(5)
-with col1:
-    volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
-with col2:
-    negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
-with col3:
-    volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999.00, 500.00)
-with col4:
-    negocios_call = st.slider('Quantidade mínima de negócios da CALL', 1, 1000, 1, 1)
-with col5:
-    filtro_data = st.date_input('Data último negócio', format='DD/MM/YYYY')
+with st.container():
+    st.write('')
+    st.write('Filtros')
+    col1, col2, col3, col4, col5 = st.columns(5)
+    with col1:
+        volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
+    with col2:
+        negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
+    with col3:
+        volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999.00, 500.00)
+    with col4:
+        negocios_call = st.slider('Quantidade mínima de negócios da CALL', 1, 1000, 1, 1)
+    with col5:
+        filtro_data = st.date_input('Data último negócio', format='DD/MM/YYYY')
 
 #button = st.button('Ver as estratégias')
 st.write('')
