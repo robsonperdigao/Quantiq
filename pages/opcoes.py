@@ -123,7 +123,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     tx_b3 = 0.1340
     df['custo'] = (preco_ativo + df['preco_put'] - df['preco_call']) * quantidade
     df['corretagem'] = round((df['custo'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem, 2)
-    df['corretagem %'] = df['corretagem'] / df['custo'] * 100
+    df['corretagem %'] = round(df['corretagem'] / df['custo'] * 100, 2)
     df['cdi oper'] = cdi_operacao
     df['lucro minimo'] = df['strike_put'] * quantidade - df['custo']
     df['lucro min %'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
@@ -158,7 +158,7 @@ def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_
     tx_b3 = 0.1340
     df['custo'] = (preco_ativo + df['preco_put'] - df['preco_call']) * quantidade
     df['corretagem'] = round((df['custo'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem, 2)
-    df['corretagem %'] = df['corretagem'] / df['custo'] * 100
+    df['corretagem %'] = round(df['corretagem'] / df['custo'] * 100, 2)
     df['cdi oper'] = cdi_operacao
     df['lucro minimo'] = df['strike_call'] * quantidade - df['custo']
     df['lucro min %'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
