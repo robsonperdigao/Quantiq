@@ -117,7 +117,7 @@ def coleta_opcoes(ativo, vencimento):
     return df, df_put, df_call, preco_ativo
 
 # Operação - Collar de Alta
-def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1, filtro_data=None):
+def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1, filtro_data=None, risco):
     # Calcula CDI da operação
     cdi_operacao = calcula_cdi(vencimento)
     
@@ -133,7 +133,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     
     # Filtra o dataframe somente com as operações lucrativas
     df_op = df.copy()
-    df_op = df_op[df_op['lucro min pct'] >= cdi_operacao]
+    df_op = df_op[df_op['lucro min pct'] >= risco]
     df_op = df_op[df_op['lucro maximo'] > 0]
     df_op = df_op[df_op['strike_put'] > preco_ativo]
     df_op = df_op[df_op['strike_call'] > df_op['strike_put']]
@@ -148,7 +148,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     return df, df_put, df_call, df_op
 
 # Operação - Collar de Baixa
-def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1, filtro_data=None):
+def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1, filtro_data=None, risco):
     # Calcula CDI da operação
     cdi_operacao = calcula_cdi(vencimento)
     
@@ -164,7 +164,7 @@ def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_
     
     # Filtra o dataframe somente com as operações lucrativas
     df_op = df.copy()
-    df_op = df_op[df_op['lucro min pct'] >= cdi_operacao]
+    df_op = df_op[df_op['lucro min pct'] >= risco]
     df_op = df_op[df_op['lucro maximo'] > 0]
     df_op = df_op[df_op['strike_put'] < preco_ativo + 2]
     df_op = df_op[df_op['strike_call'] < df_op['strike_put']]
@@ -207,8 +207,14 @@ with st.container():
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
         volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
+        risco_sel = st.radio('CDI', 'Valor')
+        if risco_sel == 'CDI':
+            risco = calcula_cdi(vencimento)
+        else:
+            risco = st.number_input("Digite a % de risco aceitável pela operação", min_value=-100.00, value=calcula_cdi(vencimento))
     with col2:
         negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
+        
     with col3:
         volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999.00, 500.00)
     with col4:
@@ -232,10 +238,10 @@ with col3:
 with st.container():
     st.write('Lista de operações possíveis')
     if estrutura == 'Collar de Alta':
-        df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, negocios_call, filtro_data)
+        df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, negocios_call, filtro_data, risco)
         mostra_operacoes()
     elif estrutura == 'Collar de Baixa':
-        df, df_put, df_call, df_op = collar_baixa(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, negocios_call, filtro_data)
+        df, df_put, df_call, df_op = collar_baixa(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, negocios_call, filtro_data, risco)
         mostra_operacoes()
 
 st.markdown('---')
