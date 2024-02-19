@@ -213,7 +213,8 @@ with st.expander('Filtros', expanded=True):
                                 help='O valor padrão é o CDI até o vencimento da opção.\nAo definir o risco mínimo, será apresentado somente operações mais lucrativas (ou menos prejudiciais) que o valor escolhido.')
     with col2:
         negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
-        corretagem_variavel = st.number_input('Taxa de corretagem variável da sua corretora', min_value=0.00, max_value=5.00, value=0.50)
+        corretagem_variavel = st.number_input('Taxa de corretagem variável da sua corretora', min_value=0.00, max_value=5.00, value=0.50,
+                                              help='Geralmente as corretoras cobram 0,50% para exercício. Altere conforme necessidade.')
     with col3:
         volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999.00, 500.00)
         corretagem_ordem = st.number_input('Taxa de corretagem por ordem', min_value=0.00, max_value=100.00, value=2.90)
@@ -238,7 +239,6 @@ button = st.button('Ver as estratégias')
 
 with st.container():
     if button:
-        st.markdown('---')
         if estrutura == 'Collar de Alta':
             df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, 
                                                     negocios_call, filtro_data, risco, corretagem_variavel, corretagem_ordem)
