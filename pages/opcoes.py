@@ -79,6 +79,7 @@ def coleta_opcoes(ativo, vencimento):
     r = requests.get(url).json()
     x = ([ativo, vencimento, i[0].split('_')[0], i[2], i[3], i[5], i[8], i[9], i[10], i[11]] for i in r['data']['cotacoesOpcoes'])
     df = pd.DataFrame(x, columns=['ativo', 'vencimento', 'ticker', 'tipo', 'modelo', 'strike', 'preco', 'negocios', 'volume', 'data ult'])
+    df['data ult'] = df['data ult'].apply(lambda x: datetime.strptime(x, '%d/%m/%Y').date() if isinstance(x, str) else None)
     
     # Cria um dataframe somente com as PUTs
     df_put = df[df['tipo'] == 'PUT']
@@ -116,7 +117,7 @@ def coleta_opcoes(ativo, vencimento):
     return df, df_put, df_call, preco_ativo
 
 # Operação - Collar de Alta
-def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1):
+def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1, filtro_data=None):
     # Calcula CDI da operação
     cdi_operacao = calcula_cdi(vencimento)
     
@@ -140,12 +141,14 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     df_op = df_op[df_op['negocios_put'] >= negocios_put]
     df_op = df_op[df_op['volume_call'] >= volume_call]
     df_op = df_op[df_op['negocios_call'] >= negocios_call]
+    df_op = df_op[df_op['data ult_put'] >= filtro_data]
+    df_op = df_op[df_op['data ult_call'] >= filtro_data]
     df_op = df_op.sort_values(by='lucro min pct',ascending=True)
     
     return df, df_put, df_call, df_op
 
 # Operação - Collar de Baixa
-def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1):
+def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1, filtro_data=None):
     # Calcula CDI da operação
     cdi_operacao = calcula_cdi(vencimento)
     
@@ -169,6 +172,8 @@ def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_
     df_op = df_op[df_op['negocios_put'] >= negocios_put]
     df_op = df_op[df_op['volume_call'] >= volume_call]
     df_op = df_op[df_op['negocios_call'] >= negocios_call]
+    df_op = df_op[df_op['data ult_put'] >= filtro_data]
+    df_op = df_op[df_op['data ult_call'] >= filtro_data]
     df_op = df_op.sort_values(by='lucro min pct',ascending=True)
     
     return df, df_put, df_call, df_op
@@ -182,25 +187,36 @@ st.title('Estratégias de Opções')
 st.write('Selecione o ativo desejado e escolha a estrutura que pretende montar com opções e veja o resultado detalhado dos ativos.')
 st.markdown('---')
 
+
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     ativos = lista_empresas()
     ativos.append('BOVA11')
-    ativo = st.selectbox('Selecione o ativo', ativos, index=None)
-    volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
-
+    ativo = st.selectbox('Selecione o ativo', ativos, index=None, placeholder='Digite ou selecione')
 with col2:
     vencimento = st.date_input('Data de vencimento das opções', format='DD/MM/YYYY')
     negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
-
 with col3:
     quantidade = st.number_input('Quantidade', min_value=1, step=1, value=100)
     volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999.00, 500.00)
-
 with col4:
     estruturas = ['Collar de Alta', 'Collar de Baixa']
     estrutura = st.selectbox('Selecione a estrutura', estruturas)
     negocios_call = st.slider('Quantidade mínima de negócios da CALL', 1, 1000, 1, 1)
+
+st.write('')
+st.write('Filtros')
+col1, col2, col3, col4, col5 = st.columns(5)
+with col1:
+    volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
+with col2:
+    negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
+with col3:
+    volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999.00, 500.00)
+with col4:
+    negocios_call = st.slider('Quantidade mínima de negócios da CALL', 1, 1000, 1, 1)
+with col5:
+    filtro_data = st.date_input('Data último negócio', format='DD/MM/YYYY')
 
 #button = st.button('Ver as estratégias')
 st.write('')
@@ -215,14 +231,13 @@ with col3:
     call = st.checkbox('Ver tabela das CALLs')
 
 
-
 with st.container():
     st.write('Lista de operações possíveis')
     if estrutura == 'Collar de Alta':
-        df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, negocios_call)
+        df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, negocios_call, filtro_data)
         mostra_operacoes()
     elif estrutura == 'Collar de Baixa':
-        df, df_put, df_call, df_op = collar_baixa(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, negocios_call)
+        df, df_put, df_call, df_op = collar_baixa(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, negocios_call, filtro_data)
         mostra_operacoes()
 
 st.markdown('---')
