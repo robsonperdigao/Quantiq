@@ -127,7 +127,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     # Coleta as opções disponíveis para o ativo com base no vencimento determinado
     df, df_put, df_call, preco_ativo = coleta_opcoes(ativo, vencimento)
     
-    calcula_custo()
+    calcula_custo(preco_ativo, quantidade, corretagem_variavel, corretagem_ordem)
     df['cdi oper'] = cdi_operacao
     df['lucro minimo'] = df['strike_put'] * quantidade - df['custo']
     df['lucro min %'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
