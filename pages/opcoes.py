@@ -145,7 +145,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     return df, df_put, df_call, df_op
 
 # Operação - Collar de Baixa
-def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1):
+def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1):
     # Calcula CDI da operação
     cdi_operacao = calcula_cdi(vencimento)
     
@@ -172,6 +172,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     df_op = df_op.sort_values(by='lucro min pct',ascending=True)
     
     return df, df_put, df_call, df_op
+
 
 st.set_page_config(page_title='Estratégias com Opções',
                    page_icon='❇️',
