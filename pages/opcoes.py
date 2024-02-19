@@ -151,7 +151,7 @@ with col3:
 with st.container():
     st.write('Lista de operações possíveis')
     if estrutura == 'Collar de Alta':
-        df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade)
+        df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, negocios_call)
         if len(df) == 0:
             st.write('Não há estratégias disponíveis')
         else:
