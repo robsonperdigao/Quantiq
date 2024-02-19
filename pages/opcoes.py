@@ -210,11 +210,11 @@ with st.expander('Filtros', expanded=True):
     with col1:
         volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
         risco = st.number_input("% de risco aceitável pela operação", min_value=-100.00, value=calcula_cdi(vencimento), 
-                                help='O valor padrão é o CDI até o vencimento da opção.\nAo definir o risco mínimo, será apresentado somente operações mais lucrativas (ou menos prejudiciais) que o valor escolhido.')
+                                help='O valor padrão é o CDI até o vencimento da opção. Ao definir o risco mínimo, será apresentado somente operações mais lucrativas (ou menos prejudiciais) que o valor escolhido.')
     with col2:
         negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
-        corretagem_variavel = st.number_input('Taxa de corretagem variável da sua corretora', min_value=0.00, max_value=5.00, value=0.50,
-                                              help='Geralmente as corretoras cobram 0,50% para exercício. Altere conforme necessidade.')
+        corretagem_variavel = st.number_input('Taxa de corretagem variável', min_value=0.00, max_value=5.00, value=0.50,
+                                              help='Geralmente as corretoras cobram 0,50% do volume para exercício. Altere conforme necessidade.')
     with col3:
         volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999.00, 500.00)
         corretagem_ordem = st.number_input('Taxa de corretagem por ordem', min_value=0.00, max_value=100.00, value=2.90)
