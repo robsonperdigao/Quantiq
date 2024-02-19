@@ -69,7 +69,6 @@ def calcula_cdi(vencimento):
     cdi_operacao = round(((1 + selic / 100) ** (dias_uteis / 252) - 1) * 100, 2)
     return cdi_operacao
 
-
 def coleta_opcoes(ativo, vencimento):
     # Coleta o preço do ativo com base no último fechamento
     preco_ativo = round(yf.download(ativo +'.SA', period='1d')['Adj Close'].iloc[-1], 2)
@@ -211,6 +210,7 @@ with st.container():
         subcol1, subcol2 = st.columns(2)
         with subcol1:
             risco_sel = st.radio('Qual o risco da operação?',['CDI', 'Valor'], index=0)
+        with subcol2:
             if risco_sel == 'CDI':
                 risco = calcula_cdi(vencimento)
             else:
