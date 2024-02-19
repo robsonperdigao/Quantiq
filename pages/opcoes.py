@@ -120,20 +120,20 @@ with col1:
     ativos = lista_empresas()
     ativos.append('BOVA11')
     ativo = st.selectbox('Selecione o ativo', ativos, index=333)
-    volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999, 500, 100)
+    volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
 
 with col2:
     vencimento = st.date_input('Data de vencimento das opções', format='DD/MM/YYYY')
-    negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 100000, 1, 1)
+    negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
 
 with col3:
     quantidade = st.number_input('Quantidade', min_value=1, step=1, value=100)
-    volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999, 500, 100)
+    volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999.00, 500.00)
 
 with col4:
     estruturas = ['Collar de Alta', 'Collar de Baixa']
     estrutura = st.selectbox('Selecione a estrutura', estruturas)
-    negocios_call = st.slider('Quantidade mínima de negócios da CALL', 1, 100000, 1, 1)
+    negocios_call = st.slider('Quantidade mínima de negócios da CALL', 1, 1000, 1, 1)
 
 #button = st.button('Ver as estratégias')
 st.write('')
