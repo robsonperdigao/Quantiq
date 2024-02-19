@@ -132,7 +132,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     
     # Filtra o dataframe somente com as operações lucrativas
     df_op = df.copy()
-    df_op = df_op[df_op['lucro min %'] >= risco]
+    df_op = df_op[df_op['lucro min %'] >= df['corretagem %'] + risco]
     df_op = df_op[df_op['lucro maximo'] > 0]
     df_op = df_op[df_op['strike_put'] > preco_ativo]
     df_op = df_op[df_op['strike_call'] > df_op['strike_put']]
@@ -167,7 +167,7 @@ def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_
     
     # Filtra o dataframe somente com as operações lucrativas
     df_op = df.copy()
-    df_op = df_op[df_op['lucro min %'] >= risco]
+    df_op = df_op[df_op['lucro min %'] >= df['corretagem %'] + risco]
     df_op = df_op[df_op['lucro maximo'] > 0]
     df_op = df_op[df_op['strike_put'] < preco_ativo + 2]
     df_op = df_op[df_op['strike_call'] < df_op['strike_put']]
