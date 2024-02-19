@@ -28,13 +28,13 @@ def lista_empresas():
 
     return list(df['Papel'])
 
-# Coleta as opções com todos os vencimentos
+'''# Coleta as opções com todos os vencimentos
 def opt_all(ativo):
     url = f'https://opcoes.net.br/listaopcoes/completa?idLista=ML&idAcao={ativo}&listarVencimentos=true&cotacoes=true'
     r = requests.get(url).json()
     vencimentos = [i['value'] for i in r['data']['vencimentos']]
     df = pd.concat([opt_venc(ativo, vencimento) for vencimento in vencimentos])
-    return df
+    return df'''
 
 # Mostrar tabela de operações
 def mostra_operacoes():
@@ -117,7 +117,7 @@ def coleta_opcoes(ativo, vencimento):
     return df, df_put, df_call, preco_ativo
 
 # Operação - Collar de Alta
-def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1, filtro_data=None, risco):
+def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1, filtro_data=None, risco=0):
     # Calcula CDI da operação
     cdi_operacao = calcula_cdi(vencimento)
     
@@ -148,7 +148,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     return df, df_put, df_call, df_op
 
 # Operação - Collar de Baixa
-def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1, filtro_data=None, risco):
+def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1, filtro_data=None, risco=0):
     # Calcula CDI da operação
     cdi_operacao = calcula_cdi(vencimento)
     
@@ -207,11 +207,14 @@ with st.container():
     col1, col2, col3, col4, col5 = st.columns(5)
     with col1:
         volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
-        risco_sel = st.radio('CDI', 'Valor')
-        if risco_sel == 'CDI':
-            risco = calcula_cdi(vencimento)
-        else:
-            risco = st.number_input("Digite a % de risco aceitável pela operação", min_value=-100.00, value=calcula_cdi(vencimento))
+        
+        subcol1, subcol2 = st.columns(2)
+        with subcol1:
+            risco_sel = st.radio('Qual o risco da operação?',['CDI', 'Valor'], index=0)
+            if risco_sel == 'CDI':
+                risco = calcula_cdi(vencimento)
+            else:
+                risco = st.number_input("Digite a % de risco aceitável pela operação", min_value=-100.00, value=calcula_cdi(vencimento))
     with col2:
         negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
         
