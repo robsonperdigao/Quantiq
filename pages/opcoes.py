@@ -41,18 +41,14 @@ def mostra_operacoes():
     if len(df) == 0:
         st.write('Não há estratégias disponíveis')
     else:
-        st.dataframe(df_op)
-
-        with st.container():
-            if tabela:
-                st.write('Tabela com todas as operações para o ativo')
-                st.dataframe(df)
-            if put:
-                st.write('Tabela com todas as PUTs do ativo')
-                st.dataframe(df_put)
-            if call:
-                st.write('Tabela com todas as CALLs do ativo')
-                st.dataframe(df_call)
+        with st.expander('Lista de operações possíveis', expanded=True):
+            st.dataframe(df_op)
+        with st.expander('Tabela com todas as operações para o ativo'):
+            st.dataframe(df)
+        with st.expander('Tabela com todas as PUTs do ativo'):
+            st.dataframe(df_put)
+        with st.expander('Tabela com todas as CALLs do ativo'):
+            st.dataframe(df_call)
     return
 
 def calcula_cdi(vencimento):
@@ -227,9 +223,9 @@ with col5:
 
 button = st.button('Ver as estratégias')
 
-st.markdown('---')
 with st.container():
     if button:
+        st.markdown('---')
         col1, col2, col3 = st.columns(3)
         with col1:
             tabela = st.checkbox('Ver todas as operações')
@@ -238,7 +234,6 @@ with st.container():
         with col3:
             call = st.checkbox('Ver tabela das CALLs')
 
-        st.write('Lista de operações possíveis')
         if estrutura == 'Collar de Alta':
             df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, 
                                                     negocios_call, filtro_data, risco, corretagem_variavel, corretagem_ordem)
