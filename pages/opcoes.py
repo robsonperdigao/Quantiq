@@ -157,7 +157,7 @@ def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_
 
     tx_b3 = 0.1340
     df['custo'] = (df['preco_put'] - df['preco_call'] + preco_ativo) * quantidade
-    df['corretagem'] = (df['custo'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem
+    df['corretagem'] = round(((df['custo'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem) * 100, 2)
     df['cdi oper'] = cdi_operacao
     df['lucro minimo'] = df['strike_call'] * quantidade - df['custo']
     df['lucro min %'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
