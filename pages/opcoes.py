@@ -114,9 +114,7 @@ def coleta_opcoes(ativo, vencimento):
 # Operação - Collar de Alta
 def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, 
                 negocios_call = 1, filtro_data=None, risco = 0.00, corretagem_variavel = 0.00, corretagem_ordem = 0.00):
-    # Calcula CDI da operação
-    cdi_operacao = calcula_cdi(vencimento)
-    
+
     # Coleta as opções disponíveis para o ativo com base no vencimento determinado
     df, df_put, df_call, preco_ativo = coleta_opcoes(ativo, vencimento)
     
@@ -124,7 +122,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     df['custo'] = round((preco_ativo + df['preco_put'] - df['preco_call']) * quantidade, 2)
     df['corretagem'] = round((df['custo'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem, 2)
     df['corretagem %'] = round(df['corretagem'] / df['custo'] * 100, 2)
-    df['cdi oper %'] = cdi_operacao
+    df['risco %'] = risco
     df['lucro minimo'] = round(df['strike_put'] * quantidade - df['custo'], 2)
     df['lucro min %'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
     df['lucro maximo'] = round(df['strike_call'] * quantidade - df['custo'], 2)
@@ -132,7 +130,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     
     # Filtra o dataframe somente com as operações lucrativas
     df_op = df.copy()
-    df_op = df_op[df_op['lucro min %'] >= df['corretagem %'] + risco]
+    df_op = df_op[df_op['lucro min %'] >= df['corretagem %'] + df['risco %']]
     df_op = df_op[df_op['lucro maximo'] > 0]
     df_op = df_op[df_op['strike_put'] > preco_ativo]
     df_op = df_op[df_op['strike_call'] > df_op['strike_put']]
@@ -149,9 +147,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
 # Operação - Collar de Baixa
 def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, 
                  negocios_call = 1, filtro_data=None, risco = 0.00, corretagem_variavel = 0.00, corretagem_ordem = 0.00):
-    # Calcula CDI da operação
-    cdi_operacao = calcula_cdi(vencimento)
-    
+
     # Coleta as opções disponíveis para o ativo com base no vencimento determinado
     df, df_put, df_call, preco_ativo = coleta_opcoes(ativo, vencimento)
 
@@ -159,7 +155,7 @@ def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_
     df['custo'] = round((preco_ativo + df['preco_put'] - df['preco_call']) * quantidade, 2)
     df['corretagem'] = round((df['custo'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem, 2)
     df['corretagem %'] = round(df['corretagem'] / df['custo'] * 100, 2)
-    df['cdi oper %'] = cdi_operacao
+    df['risco %'] = risco
     df['lucro minimo'] = round(df['strike_call'] * quantidade - df['custo'], 2)
     df['lucro min %'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
     df['lucro maximo'] = round(df['strike_put'] * quantidade - df['custo'], 2)
@@ -167,7 +163,7 @@ def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_
     
     # Filtra o dataframe somente com as operações lucrativas
     df_op = df.copy()
-    df_op = df_op[df_op['lucro min %'] >= df['corretagem %'] + risco]
+    df_op = df_op[df_op['lucro min %'] >= df['corretagem %'] + df['risco %']]
     df_op = df_op[df_op['lucro maximo'] > 0]
     df_op = df_op[df_op['strike_put'] < preco_ativo + 2]
     df_op = df_op[df_op['strike_call'] < df_op['strike_put']]
