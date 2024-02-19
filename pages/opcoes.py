@@ -111,13 +111,6 @@ def coleta_opcoes(ativo, vencimento):
     
     return df, df_put, df_call, preco_ativo
 
-def calcula_custo(preco_ativo, quantidade, corretagem_variavel, corretagem_ordem):
-    tx_b3 = 0.1340
-    df['custo'] = (preco_ativo + df['preco_put'] - df['preco_call']) * quantidade
-    df['corretagem'] = round((df['custo'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem, 2)
-    df['corretagem %'] = df['corretagem'] / df['custo'] * 100
-
-    return
 # Operação - Collar de Alta
 def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, 
                 negocios_call = 1, filtro_data=None, risco = 0.00, corretagem_variavel = 0.00, corretagem_ordem = 0.00):
@@ -127,7 +120,10 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     # Coleta as opções disponíveis para o ativo com base no vencimento determinado
     df, df_put, df_call, preco_ativo = coleta_opcoes(ativo, vencimento)
     
-    calcula_custo(preco_ativo, quantidade, corretagem_variavel, corretagem_ordem)
+    tx_b3 = 0.1340
+    df['custo'] = (preco_ativo + df['preco_put'] - df['preco_call']) * quantidade
+    df['corretagem'] = round((df['custo'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem, 2)
+    df['corretagem %'] = df['corretagem'] / df['custo'] * 100
     df['cdi oper'] = cdi_operacao
     df['lucro minimo'] = df['strike_put'] * quantidade - df['custo']
     df['lucro min %'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
@@ -161,7 +157,8 @@ def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_
 
     tx_b3 = 0.1340
     df['custo'] = (preco_ativo + df['preco_put'] - df['preco_call']) * quantidade
-    df['corretagem'] = round(((df['custo'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem) * 100, 2)
+    df['corretagem'] = round((df['custo'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem, 2)
+    df['corretagem %'] = df['corretagem'] / df['custo'] * 100
     df['cdi oper'] = cdi_operacao
     df['lucro minimo'] = df['strike_call'] * quantidade - df['custo']
     df['lucro min %'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
