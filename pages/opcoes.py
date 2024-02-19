@@ -28,14 +28,6 @@ def lista_empresas():
 
     return list(df['Papel'])
 
-# Coleta as opções com data de vencimento específica
-def opt_venc(ativo, vencimento):
-    url = f'https://opcoes.net.br/listaopcoes/completa?idAcao={ativo}&listarVencimentos=false&cotacoes=true&vencimentos={vencimento}'
-    r = requests.get(url).json()
-    x = ([ativo, vencimento, i[0].split('_')[0], i[2], i[3], i[5], i[8], i[9], i[10], i[11]] for i in r['data']['cotacoesOpcoes'])
-    df = pd.DataFrame(x, columns=['ativo', 'vencimento', 'ticker', 'tipo', 'modelo', 'strike', 'preco', 'negocios', 'volume', 'data ult'])
-    return df
-
 # Coleta as opções com todos os vencimentos
 def opt_all(ativo):
     url = f'https://opcoes.net.br/listaopcoes/completa?idLista=ML&idAcao={ativo}&listarVencimentos=true&cotacoes=true'
@@ -44,8 +36,26 @@ def opt_all(ativo):
     df = pd.concat([opt_venc(ativo, vencimento) for vencimento in vencimentos])
     return df
 
-# Operação - Collar de Alta
-def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1):
+# Mostrar tabela de operações
+def mostra_operacoes():
+    if len(df) == 0:
+        st.write('Não há estratégias disponíveis')
+    else:
+        st.dataframe(df_op)
+
+        with st.container():
+            if tabela:
+                st.write('Tabela com todas as operações para o ativo')
+                st.dataframe(df)
+            if put:
+                st.write('Tabela com todas as PUTs do ativo')
+                st.dataframe(df_put)
+            if call:
+                st.write('Tabela com todas as CALLs do ativo')
+                st.dataframe(df_call)
+    return
+
+def calcula_cdi(vencimento):
     # Coleta selic anual direto pelo BC
     url_selic = f'http://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados?formato=json'
     selic = pd.read_json(url_selic)
@@ -57,15 +67,32 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     data_hoje = dt.date.today()
     dias_uteis = wd.networkdays(data_hoje, vencimento, country='BR')
     cdi_operacao = round(((1 + selic / 100) ** (dias_uteis / 252) - 1) * 100, 2)
-    
+    return cdi_operacao
+
+
+def coleta_opcoes(ativo, vencimento):
     # Coleta o preço do ativo com base no último fechamento
     preco_ativo = round(yf.download(ativo +'.SA', period='1d')['Adj Close'].iloc[-1], 2)
     
-    # Coleta as opções disponíveis para o ativo com base no vencimento determinado
-    df = opt_venc(ativo, vencimento)
+    # Coleta informações das opções
+    url = f'https://opcoes.net.br/listaopcoes/completa?idAcao={ativo}&listarVencimentos=false&cotacoes=true&vencimentos={vencimento}'
+    r = requests.get(url).json()
+    x = ([ativo, vencimento, i[0].split('_')[0], i[2], i[3], i[5], i[8], i[9], i[10], i[11]] for i in r['data']['cotacoesOpcoes'])
+    df = pd.DataFrame(x, columns=['ativo', 'vencimento', 'ticker', 'tipo', 'modelo', 'strike', 'preco', 'negocios', 'volume', 'data ult'])
     
     # Cria um dataframe somente com as PUTs
     df_put = df[df['tipo'] == 'PUT']
+    df_put_op = df_put.copy()
+    df_put_op.rename(columns={
+        'ticker': 'ticker_put',
+        'tipo': 'tipo_put',
+        'modelo': 'modelo_put',
+        'strike': 'strike_put', 
+        'preco': 'preco_put',
+        'negocios': 'negocios_put',
+        'volume': 'volume_put',
+        'data ult': 'data ult_put'
+    }, inplace=True)
 
     # Cria um dataframe somente com as CALLs e renomeia colunas para diferenciar
     df_call = df[df['tipo'] == 'CALL']
@@ -83,12 +110,22 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     }, inplace=True)
 
     # Cria um dataframe com as operações possíveis para cada PUT
-    df = pd.merge(df_put, df_call_op, on='ativo', suffixes=('', '_call'))
-    df = df[df['strike'] > preco_ativo]
+    df = pd.merge(df_put_op, df_call_op, on='ativo', suffixes=('', '_call'))
     df['preco ativo'] = preco_ativo
-    df['custo'] = (df['preco'] - df['preco_call'] + preco_ativo) * quantidade
+    
+    return df, df_put, df_call, preco_ativo
+
+# Operação - Collar de Alta
+def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1):
+    # Calcula CDI da operação
+    cdi_operacao = calcula_cdi(vencimento)
+    
+    # Coleta as opções disponíveis para o ativo com base no vencimento determinado
+    df, df_put, df_call, preco_ativo = coleta_opcoes(ativo, vencimento)
+       
+    df['custo'] = (df['preco_put'] - df['preco_call'] + preco_ativo) * quantidade
     df['cdi oper'] = cdi_operacao
-    df['lucro minimo'] = df['strike'] * quantidade - df['custo']
+    df['lucro minimo'] = df['strike_put'] * quantidade - df['custo']
     df['lucro min pct'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
     df['lucro maximo'] = df['strike_call'] * quantidade - df['custo']
     df['lucro max pct'] = round(df['lucro maximo'] / df['custo'] * 100, 2)
@@ -97,15 +134,44 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     df_op = df.copy()
     df_op = df_op[df_op['lucro min pct'] >= cdi_operacao]
     df_op = df_op[df_op['lucro maximo'] > 0]
-    df_op = df_op[df_op['strike_call'] > df_op['strike']]
-    df_op = df_op[df_op['volume'] >= volume_put]
-    df_op = df_op[df_op['negocios'] >= negocios_put]
+    df_op = df_op[df_op['strike_put'] > preco_ativo]
+    df_op = df_op[df_op['strike_call'] > df_op['strike_put']]
+    df_op = df_op[df_op['volume_put'] >= volume_put]
+    df_op = df_op[df_op['negocios_put'] >= negocios_put]
     df_op = df_op[df_op['volume_call'] >= volume_call]
     df_op = df_op[df_op['negocios_call'] >= negocios_call]
     df_op = df_op.sort_values(by='lucro min pct',ascending=True)
     
     return df, df_put, df_call, df_op
 
+# Operação - Collar de Baixa
+def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_put = 1, volume_call = 0.01, negocios_call = 1):
+    # Calcula CDI da operação
+    cdi_operacao = calcula_cdi(vencimento)
+    
+    # Coleta as opções disponíveis para o ativo com base no vencimento determinado
+    df, df_put, df_call, preco_ativo = coleta_opcoes(ativo, vencimento)
+       
+    df['custo'] = (df['preco_put'] - df['preco_call'] + preco_ativo) * quantidade
+    df['cdi oper'] = cdi_operacao
+    df['lucro minimo'] = df['strike_call'] * quantidade - df['custo']
+    df['lucro min pct'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
+    df['lucro maximo'] = df['strike_put'] * quantidade - df['custo']
+    df['lucro max pct'] = round(df['lucro maximo'] / df['custo'] * 100, 2)
+    
+    # Filtra o dataframe somente com as operações lucrativas
+    df_op = df.copy()
+    df_op = df_op[df_op['lucro min pct'] >= cdi_operacao]
+    df_op = df_op[df_op['lucro maximo'] > 0]
+    df_op = df_op[df_op['strike_put'] < preco_ativo + 2]
+    df_op = df_op[df_op['strike_call'] < df_op['strike_put']]
+    df_op = df_op[df_op['volume_put'] >= volume_put]
+    df_op = df_op[df_op['negocios_put'] >= negocios_put]
+    df_op = df_op[df_op['volume_call'] >= volume_call]
+    df_op = df_op[df_op['negocios_call'] >= negocios_call]
+    df_op = df_op.sort_values(by='lucro min pct',ascending=True)
+    
+    return df, df_put, df_call, df_op
 
 st.set_page_config(page_title='Estratégias com Opções',
                    page_icon='❇️',
@@ -119,7 +185,7 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     ativos = lista_empresas()
     ativos.append('BOVA11')
-    ativo = st.selectbox('Selecione o ativo', ativos)
+    ativo = st.selectbox('Selecione o ativo', ativos, index=None)
     volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
 
 with col2:
@@ -148,24 +214,14 @@ with col3:
     call = st.checkbox('Ver tabela das CALLs')
 
 
+
 with st.container():
     st.write('Lista de operações possíveis')
     if estrutura == 'Collar de Alta':
         df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, negocios_call)
-        if len(df) == 0:
-            st.write('Não há estratégias disponíveis')
-        else:
-            st.dataframe(df_op)
-
-            with st.container():
-                if tabela:
-                    st.write('Tabela com todas as operações para o ativo')
-                    st.dataframe(df)
-                if put:
-                    st.write('Tabela com todas as PUTs do ativo')
-                    st.dataframe(df_put)
-                if call:
-                    st.write('Tabela com todas as CALLs do ativo')
-                    st.dataframe(df_call)
+        mostra_operacoes()
+    elif estrutura == 'Collar de Baixa':
+        df, df_put, df_call, df_op = collar_baixa(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, negocios_call)
+        mostra_operacoes()
 
 st.markdown('---')
