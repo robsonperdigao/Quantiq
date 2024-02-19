@@ -125,17 +125,18 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     df, df_put, df_call, preco_ativo = coleta_opcoes(ativo, vencimento)
     
     tx_b3 = 0.1340
+    df['custo'] = (df['preco_put'] - df['preco_call'] + preco_ativo) * quantidade
     df['corretagem'] = ((preco_ativo + df['preco_put'] + df['preco_call']) * (corretagem_variavel + tx_b3)) + 6 * corretagem_ordem
-    df['custo'] = ((df['preco_put'] - df['preco_call'] + preco_ativo) * quantidade) - df['corretagem']
+    df['corretagem %'] = df['corretagem'] / df['custo']
     df['cdi oper'] = cdi_operacao
     df['lucro minimo'] = df['strike_put'] * quantidade - df['custo']
-    df['lucro min pct'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
+    df['lucro min %'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
     df['lucro maximo'] = df['strike_call'] * quantidade - df['custo']
-    df['lucro max pct'] = round(df['lucro maximo'] / df['custo'] * 100, 2)
+    df['lucro max %'] = round(df['lucro maximo'] / df['custo'] * 100, 2)
     
     # Filtra o dataframe somente com as operações lucrativas
     df_op = df.copy()
-    df_op = df_op[df_op['lucro min pct'] >= risco]
+    df_op = df_op[df_op['lucro min %'] >= risco]
     df_op = df_op[df_op['lucro maximo'] > 0]
     df_op = df_op[df_op['strike_put'] > preco_ativo]
     df_op = df_op[df_op['strike_call'] > df_op['strike_put']]
@@ -145,7 +146,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     df_op = df_op[df_op['negocios_call'] >= negocios_call]
     df_op = df_op[df_op['data ult_put'] >= filtro_data]
     df_op = df_op[df_op['data ult_call'] >= filtro_data]
-    df_op = df_op.sort_values(by='lucro min pct',ascending=True)
+    df_op = df_op.sort_values(by='lucro min %',ascending=True)
     
     return df, df_put, df_call, df_op
 
@@ -159,17 +160,17 @@ def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_
     df, df_put, df_call, preco_ativo = coleta_opcoes(ativo, vencimento)
 
     tx_b3 = 0.1340
-    df['corretagem'] = ((preco_ativo + df['preco_put'] + df['preco_call']) * (corretagem_variavel + tx_b3)) + 6 * corretagem_ordem
     df['custo'] = (df['preco_put'] - df['preco_call'] + preco_ativo) * quantidade
+    df['corretagem'] = ((preco_ativo + df['preco_put'] + df['preco_call']) * (corretagem_variavel + tx_b3)) + 6 * corretagem_ordem
     df['cdi oper'] = cdi_operacao
     df['lucro minimo'] = df['strike_call'] * quantidade - df['custo']
-    df['lucro min pct'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
+    df['lucro min %'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
     df['lucro maximo'] = df['strike_put'] * quantidade - df['custo']
-    df['lucro max pct'] = round(df['lucro maximo'] / df['custo'] * 100, 2)
+    df['lucro max %'] = round(df['lucro maximo'] / df['custo'] * 100, 2)
     
     # Filtra o dataframe somente com as operações lucrativas
     df_op = df.copy()
-    df_op = df_op[df_op['lucro min pct'] >= risco]
+    df_op = df_op[df_op['lucro min %'] >= risco]
     df_op = df_op[df_op['lucro maximo'] > 0]
     df_op = df_op[df_op['strike_put'] < preco_ativo + 2]
     df_op = df_op[df_op['strike_call'] < df_op['strike_put']]
@@ -179,7 +180,7 @@ def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_
     df_op = df_op[df_op['negocios_call'] >= negocios_call]
     df_op = df_op[df_op['data ult_put'] >= filtro_data]
     df_op = df_op[df_op['data ult_call'] >= filtro_data]
-    df_op = df_op.sort_values(by='lucro min pct',ascending=True)
+    df_op = df_op.sort_values(by='lucro min %',ascending=True)
     
     return df, df_put, df_call, df_op
 
@@ -192,6 +193,7 @@ st.title('Estratégias de Opções')
 st.write('Selecione o ativo desejado e escolha a estrutura que pretende montar com opções e veja o resultado detalhado dos ativos.')
 st.markdown('---')
 
+"st.session_state object:", st.session_state
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
@@ -206,29 +208,27 @@ with col4:
     estruturas = ['Collar de Alta', 'Collar de Baixa']
     estrutura = st.selectbox('Selecione a estrutura', estruturas)
 
-with st.container():
-    st.write('')
-    st.write('Filtros')
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
-        risco = st.number_input("% de risco aceitável pela operação", min_value=-100.00, value=calcula_cdi(vencimento), 
-                                help='O valor padrão é o CDI até o vencimento da opção.\nAo definir o risco mínimo, será apresentado somente operações mais lucrativas (ou menos prejudiciais) que o valor escolhido.')
-    with col2:
-        negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
-        corretagem_variavel = st.number_input('Taxa de corretagem variável da sua corretora', min_value=0.00, max_value=5.00, value=0.50)
-    with col3:
-        volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999.00, 500.00)
-        corretagem_ordem = st.number_input('Taxa de corretagem por ordem', min_value=0.00, max_value=100.00, value=2.90)
-    with col4:
-        negocios_call = st.slider('Quantidade mínima de negócios da CALL', 1, 1000, 1, 1)
-    with col5:
-        filtro_data = st.date_input('Data último negócio', format='DD/MM/YYYY')
+st.write('')
+st.write('Filtros')
+col1, col2, col3, col4, col5 = st.columns(5)
+with col1:
+    volume_put = st.slider('Volume mínimo da PUT', 0.01, 9999999.00, 500.00)
+    risco = st.number_input("% de risco aceitável pela operação", min_value=-100.00, value=calcula_cdi(vencimento), 
+                            help='O valor padrão é o CDI até o vencimento da opção.\nAo definir o risco mínimo, será apresentado somente operações mais lucrativas (ou menos prejudiciais) que o valor escolhido.')
+with col2:
+    negocios_put = st.slider('Quantidade mínima de negócios da PUT', 1, 1000, 1, 1)
+    corretagem_variavel = st.number_input('Taxa de corretagem variável da sua corretora', min_value=0.00, max_value=5.00, value=0.50)
+with col3:
+    volume_call = st.slider('Volume mínimo da CALL', 0.01, 9999999.00, 500.00)
+    corretagem_ordem = st.number_input('Taxa de corretagem por ordem', min_value=0.00, max_value=100.00, value=2.90)
+with col4:
+    negocios_call = st.slider('Quantidade mínima de negócios da CALL', 1, 1000, 1, 1)
+with col5:
+    filtro_data = st.date_input('Data último negócio', format='DD/MM/YYYY')
 
-#button = st.button('Ver as estratégias')
+button = st.button('Ver as estratégias')
 st.write('')
 
-#if button:
 col1, col2, col3 = st.columns(3)
 with col1:
     tabela = st.checkbox('Ver todas as operações')
@@ -239,14 +239,15 @@ with col3:
 
 
 with st.container():
-    st.write('Lista de operações possíveis')
-    if estrutura == 'Collar de Alta':
-        df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, 
-                                                 negocios_call, filtro_data, risco, corretagem_variavel, corretagem_ordem)
-        mostra_operacoes()
-    elif estrutura == 'Collar de Baixa':
-        df, df_put, df_call, df_op = collar_baixa(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, 
-                                                  negocios_call, filtro_data, risco, corretagem_variavel, corretagem_ordem)
-        mostra_operacoes()
+    if button:
+        st.write('Lista de operações possíveis')
+        if estrutura == 'Collar de Alta':
+            df, df_put, df_call, df_op = collar_alta(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, 
+                                                    negocios_call, filtro_data, risco, corretagem_variavel, corretagem_ordem, key='collar_alta')
+            mostra_operacoes()
+        elif estrutura == 'Collar de Baixa':
+            df, df_put, df_call, df_op = collar_baixa(ativo, vencimento, quantidade, volume_put, negocios_put, volume_call, 
+                                                    negocios_call, filtro_data, risco, corretagem_variavel, corretagem_ordem, key='collar_baixa')
+            mostra_operacoes()
 
 st.markdown('---')
