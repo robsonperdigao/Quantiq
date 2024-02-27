@@ -1,26 +1,6 @@
 import streamlit as st
-import pandas as pd
-import requests
+from src import utils
 
-def lista_empresas():
-    """
-    Papel: Get list of tickers
-      URL:
-        http://fundamentus.com.br/detalhes.php
-
-    Output:
-      list
-    """
-
-    url = 'http://www.fundamentus.com.br/resultado.php'
-    header = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36"}
-    r = requests.get(url, headers=header)
-    df = pd.read_html(r.text,  decimal=',', thousands='.')[0]
-    for coluna in ['Div.Yield', 'Mrg Ebit', 'Mrg. Líq.', 'ROIC', 'ROE', 'Cresc. Rec.5a']:
-        df[coluna] = df[coluna].str.replace('.', '')
-        df[coluna] = df[coluna].str.replace(',', '.')
-        df[coluna] = df[coluna].str.rstrip('%').astype('float')
-    return df
 
 st.set_page_config(page_title='Faça Fortuna com Ações - Décio Bazin',
                     page_icon='🎯',
@@ -46,7 +26,7 @@ botao = st.button('Botão do Bazin')
 
 if botao:
     with st.spinner('Gerando a lista com as melhores empresas do Método Bazin...'):
-        empresas = lista_empresas()
+        empresas = utils.ativos_fundamentus()
         empresas = empresas[['Papel', 'Cotação', 'Div.Yield', 'Liq.2meses', 'Dív.Brut/ Patrim.']]
         empresas = empresas.set_index('Papel')
         empresas = empresas[empresas['Liq.2meses'] > liquidez]

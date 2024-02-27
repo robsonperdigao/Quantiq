@@ -3,27 +3,8 @@ from datetime import date
 import pandas as pd
 import yfinance as yf
 import plotly.graph_objects as go
-import requests
+from src import utils
 
-def lista_empresas():
-    """
-    Papel: Get list of tickers
-      URL:
-        http://fundamentus.com.br/detalhes.php
-
-    Output:
-      list
-    """
-
-    url = 'http://fundamentus.com.br/detalhes.php'
-    header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201',
-           'Accept': 'text/html, text/plain, text/css, text/sgml, */*;q=0.01',
-           'Accept-Encoding': 'gzip, deflate',
-           }
-    r = requests.get(url, headers=header)
-    df = pd.read_html(r.text)[0]
-
-    return list(df['Papel'])
 
 st.set_page_config(page_title='Panorama de Mercado', 
                    page_icon='📰',
@@ -89,7 +70,7 @@ fig = go.Figure(data=[go.Candlestick(x = indice_diario.index,
 fig.update_layout(title = indice, xaxis_rangeslider_visible = False)
 st.plotly_chart(fig) 
 
-lista_acoes =  [i + '.SA' for i in lista_empresas()]
+lista_acoes =  [i + '.SA' for i in utils.lista_ativos_b3()]
 acao = st.selectbox('Selecione', lista_acoes, index = 33)
 hist_acao = yf.download(acao, period = '1mo', interval = '1d', auto_adjust=True)
 

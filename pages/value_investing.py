@@ -1,27 +1,5 @@
 import streamlit as st
-import fundamentus as fd
-import requests
-import pandas as pd
-
-def lista_empresas():
-    """
-    Papel: Get list of tickers
-      URL:
-        http://fundamentus.com.br/detalhes.php
-
-    Output:
-      list
-    """
-
-    url = 'http://fundamentus.com.br/detalhes.php'
-    header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201',
-           'Accept': 'text/html, text/plain, text/css, text/sgml, */*;q=0.01',
-           'Accept-Encoding': 'gzip, deflate',
-           }
-    r = requests.get(url, headers=header)
-    df = pd.read_html(r.text)[0]
-
-    return list(df['Papel'])
+from src import utils
 
 
 st.set_page_config(page_title='Value Investing',
@@ -51,14 +29,10 @@ st.metric('Índice de Graham', f'{indice:.2f}')
 st.markdown('---')
 
 
-ativos = lista_empresas()
-ativo = st.selectbox('Selecione o ativo', ativos, index=789)
+ativos = utils.lista_ativos_b3()
+ativo = st.selectbox('Selecione o ativo', ativos, index=123)
 
-dados_ativo = fd.get_detalhes_papel(ativo)
-for coluna in ['Cotacao', 'PL', 'PVP', 'LPA', 'VPA']:
-        dados_ativo[coluna] = dados_ativo[coluna].str.replace('.', '')
-        dados_ativo[coluna] = dados_ativo[coluna].str.replace(',', '.')
-        dados_ativo[coluna] = dados_ativo[coluna].str.rstrip('%').astype('float') / 100
+dados_ativo = utils.fundamentos_ativo(ativo)
 dados_ativo = dados_ativo[['Cotacao', 'PL', 'PVP', 'LPA', 'VPA']]
 
 col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
@@ -68,7 +42,10 @@ pvp_ativo = float(dados_ativo['PVP'].iloc[0])
 lpa = float(dados_ativo['LPA'].iloc[0])
 vpa = float(dados_ativo['VPA'].iloc[0])
 indice_graham_ativo = round(pl_ativo * pvp_ativo, 2)
-valor_intrinseco = round((indice * lpa * vpa) ** (1 / 2), 2)
+try:
+    valor_intrinseco = round((indice * lpa * vpa) ** (1 / 2), 2)
+except:
+    valor_intrinseco = 0
 
 with col1:
     st.metric(f'P/L de {ativo}', pl_ativo)

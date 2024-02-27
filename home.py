@@ -12,8 +12,8 @@ def main():
         [
             Page('home.py', 'Home', '🏠'),
             #Section("Planejamento", '📊'),
-            Page('pages/x-ray.py', 'Raio-X Financeiro', '📊'),
-            Page('pages/is/fpclient.py', 'Exemplo FPClient', '📝'),
+            Page('pages/planner.py', 'Planejamento Financeiro', '📊'),
+            #Page('pages/is/fpclient.py', 'Exemplo FPClient', '📝'),
             #Section("Quantiq", '💲'),
             Page('pages/opcoes.py', 'Estratégias com Opções', '❇️'),
             Page('pages/comparador_rentabilidade.py', 'Comparador de Rentabilidade', '🏅'),
@@ -29,7 +29,8 @@ def main():
             Page('pages/fundos_investimentos.py', 'Mapa de Fundos de Investimentos', '🪙'),
             #Page('pages/quant/remuneracao.py', 'Remuneração', '🗄️'),
             #Section("PMF", '👨🏻‍💻'),
-            Page('pages/pmf/fundamentos.py', 'Fundamentos', '📊'),
+            Page('pages/fundamentos.py', 'Fundamentos', '📊'),
+            Page('pages/batalha_acoes.py', 'Batalha de Ações', '🥊'),
             Page('pages/pmf/panorama-mercado.py', 'Panorama de Mercado', '📰'),
             Page('pages/pmf/mapa-retornos.py', 'Mapa de Retornos Mensais', '📈')
         ]
@@ -43,7 +44,6 @@ def main():
     with col2:
         st.markdown('# Robson Perdigão')
         st.markdown('## Assessor de Investimentos')
-        st.write("[InvestSmart](https://investsmart.com.br/robson-perdigao/)")
         st.write(" LinkedIn: [@robsonperdigao](https://www.linkedin.com/in/robsonperdigao/)")
     st.write("""Me chamo Robson Perdigão, sou Assessor de Investimentos na InvestSmart.
                     Investidor desde 2012, trader desde 2018 e Assessor desde 2020.
@@ -60,7 +60,6 @@ def main():
     with col2:    
         st.info(" LinkedIn: [@robsonperdigao](https://www.linkedin.com/in/robsonperdigao/)", icon='🧔🏻‍♂️')
         st.error(" YouTube: [@robson.perdigao](https://www.youtube.com/@robson.perdigao)", icon='📹')
-        st.warning(" [Abra sua conta](https://bit.ly/rp_abrirconta) na XP Investimentos e tenha a minha assessoria")
     with col3:
         st.info(" TikTok: [@robson.perdigao](https://www.tiktok.com/@robson.perdigao)", icon='🤳🏻')
         st.warning(" Instagram: [@robson.perdigao](https://www.instagram.com/robson.perdigao/)", icon='📸')

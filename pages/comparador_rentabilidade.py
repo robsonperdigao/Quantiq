@@ -2,36 +2,19 @@ import streamlit as st
 import pandas as pd
 import numpy_financial as npf
 from datetime import date
+from src import utils
 
-
-def consulta_bc(codigo_bcb, data_ini = '01/01/1900', data_fim = date.today().strftime('%d/%m/%Y')):
-  url = f'http://api.bcb.gov.br/dados/serie/bcdata.sgs.{codigo_bcb}/dados?formato=json&dataInicial={data_ini}&dataFinal={data_fim}'
-  df = pd.read_json(url)
-  df['data'] = pd.to_datetime(df['data'], dayfirst=True)
-  df.set_index('data', inplace=True)
-  return df
 
 def calcula_taxa_mensal(taxa_anual):
     return ((1 + taxa_anual / 100) ** (1/12) - 1)
-
-def calcula_imposto(lucro, prazo):
-    if prazo <= 6:
-        ir = lucro * 0.225
-    elif prazo <= 12:
-        ir = lucro * 0.20
-    elif prazo <= 24:
-        ir = lucro * 0.175
-    else:
-        ir = lucro * 0.15
-    return ir
-    
+ 
 def calcula_retorno(ativo, aporte, prazo, taxa):
     vlr_bruto = round(npf.fv(calcula_taxa_mensal(taxa), prazo, 0, -aporte), 2)
     lucro = vlr_bruto - vlr
     if (ativo == 'LCI/LCA') or (ativo == 'CRI/CRA'):
         ir = 0
     else:
-        ir = calcula_imposto(lucro, prazo)
+        ir = utils.calcula_imposto_rf(lucro, prazo)
     lucro_liquido = lucro - ir
     vlr_liq_resgate = vlr + lucro_liquido
     rent_liq = round((vlr_liq_resgate / vlr - 1) * 100, 2)
@@ -70,13 +53,6 @@ def comparativo(key):
             st.metric('Rentabilidade líquida', f'{rent_liq:.2f}%')   
     return ativo, vlr_liq_resgate, rent_liq
 
-@st.cache_data
-def calcula_indicadores():
-    selic_ano = float(consulta_bc(432).iloc[-1].values)
-    cdi_ano = float(consulta_bc(1178).iloc[-1:].values)
-    ipca_ano = round(float(consulta_bc(433).iloc[-12:].sum().values), 2)
-    return selic_ano, cdi_ano, ipca_ano
-
     
 st.set_page_config(page_title='Comparador de Rentabilidade',
                     page_icon='🏅',
@@ -86,7 +62,7 @@ st.title('Comparador de Rentabilidade')
 st.markdown('---')
 
 
-selic_ano, cdi_ano, ipca_ano = calcula_indicadores()
+selic_ano, cdi_ano, ipca_ano = utils.calcula_indicadores_macro()
 with st.container():
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -100,6 +76,7 @@ with st.container():
     col1, col2, col3 = st.columns(3)
     with col1:
         vlr = st.number_input('Valor da aplicação')
+    with col2:
         prazo = st.number_input('Insira o prazo de vencimento (em meses)', step=1)
 
 with st.container():

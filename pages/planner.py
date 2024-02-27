@@ -5,17 +5,17 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import numpy as np
 import numpy_financial as npf
-import requests
 import yfinance as yf
 from matplotlib.ticker import FuncFormatter
 from fpdf import FPDF
 from io import BytesIO
 import tempfile
+from src import utils
 
-st.set_page_config(page_title='Raio-X Financeiro', 
+st.set_page_config(page_title='Planejamento Financeiro', 
                    page_icon='📊',
                    layout='wide')
-st.title('Raio-X Financeiro')
+st.title('Planejamento Financeiro')
 
 st.write("""Um bom planejamento financeiro oferece uma abordagem abrangente para ajudar você a atingir seus objetivos no curto, médio e longo prazo. Nesta página você poderá inserir informações sobre suas finanças pessoais, incluindo receitas, despesas, investimentos atuais e seus planos de aposentadoria desejados, e automaticamente será realizada uma projeção precisa da sua situação financeira.
 Usando algoritmos avançados, é calculada sua capacidade de poupança e projetado como seu patrimônio evoluirá ao longo do tempo. Isso é apresentado de forma visual em gráficos fáceis de entender, permitindo que você visualize seu caminho financeiro. Além disso, é possível visualizar a evolução do seu patrimônio após a aposentadoria, seja mantendo um patrimônio que gera renda vitalícia ou usando-o até os 100 anos.
@@ -26,21 +26,6 @@ Preencha as informações abaixo:""")
 st.markdown('---')
 
 
-@st.cache_data
-def calcula_idade(nascimento): 
-    hoje = date.today() 
-    try:  
-        nasc = nascimento.replace(year = hoje.year) 
-  
-    except ValueError:  
-        nasc = nascimento.replace(year = hoje.year, 
-                  month = nascimento.month + 1, day = 1) 
-  
-    if nasc > hoje: 
-        return hoje.year - nascimento.year - 1
-    else: 
-        return hoje.year - nascimento.year 
-    
 @st.cache_data
 def calcula_patrimonio(idade, idade_indep, patrim_atual, cap_poup_ano, renda_mensal_indep, tx_juro_ano): 
     anos_invest = idade_indep - idade
@@ -131,45 +116,14 @@ def calcula_gerenc_risco(patrimonio, saque_anual=0.0, tx_juros=0.04):
     df = df.set_index('Ano')
     return df, anos
 
-@st.cache_data
-def lista_empresas():
-    """
-    Papel: Get list of tickers
-      URL:
-        http://fundamentus.com.br/detalhes.php
-
-    Output:
-      list
-    """
-
-    url = 'http://fundamentus.com.br/detalhes.php'
-    header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201',
-           'Accept': 'text/html, text/plain, text/css, text/sgml, */*;q=0.01',
-           'Accept-Encoding': 'gzip, deflate',
-           }
-    r = requests.get(url, headers=header)
-    df = pd.read_html(r.text)[0]
-
-    return list(df['Papel'])
-
-@st.cache_data
-def lista_fiis():
-    url = 'https://fundamentus.com.br/fii_resultado.php'
-    header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201',
-            'Accept': 'text/html, text/plain, text/css, text/sgml, */*;q=0.01',
-            'Accept-Encoding': 'gzip, deflate',
-            }
-    r = requests.get(url, headers=header)
-    df = pd.read_html(r.text)[0]
-    return list(df['Papel'])
 
 @st.cache_data(experimental_allow_widgets=True)
 def categoria_invest(categoria, key): 
     match categoria:
         case 'Ações':
-            carteira_acoes = st.multiselect('Selecione o(s) papel(is)', lista_empresas(), placeholder='Digite o ticker', key=f'acoes{key}')
+            carteira_acoes = st.multiselect('Selecione o(s) papel(is)', utils.lista_ativos_b3(), placeholder='Digite o ticker', key=f'acoes{key}')
         case 'FIIs':
-            carteira_fiis = st.multiselect('Selecione o(s) papel(is)', lista_fiis(), placeholder='Digite o ticker', key=f'fii{key}')
+            carteira_fiis = st.multiselect('Selecione o(s) papel(is)', utils.lista_fiis_b3(), placeholder='Digite o ticker', key=f'fii{key}')
         case 'Renda Fixa':
             carteira_renda_fixa = st.text_input('Digite o(s) ativo(s)', key=f'rf{key}')
         case 'Tesouro Direto':
@@ -207,9 +161,10 @@ class PDFWithFooter(FPDF):
     def footer(self):
         self.set_y(-15)
         self.set_font('Helvetica', 'I',size=9)
-        self.cell(0, 4, 'robson.perdigao@investsmart.com.br     |     11 98047-3370     |     www.investsmart.com.br', align='L')
+        self.cell(0, 4, 'robson.perdigao@solutiadigital.com.br     |     11 98047-3370     |     www.solutiadigital.com.br', align='L')
 
 def gerar_pdf(grafico_receita, grafico_receita_despesa, grafico_patrimonio, grafico_geren_risco, grafico_consol):
+    
     pdf = PDFWithFooter()
     pdf.set_auto_page_break(auto=True, margin=15)
     pdf.set_draw_color(153, 102, 255)
@@ -246,7 +201,7 @@ def gerar_pdf(grafico_receita, grafico_receita_despesa, grafico_patrimonio, graf
     pdf.add_page()
     pdf.set_font('Helvetica', 'B', size=18)
     pdf.ln(30)
-    pdf.cell(0, 9, 'Assessoria de Investimentos')
+    pdf.cell(0, 9, 'Planejamento Financeiro')
     pdf.ln(20)
     pdf.set_font('Helvetica', 'B', size=12)
     pdf.multi_cell(0, 9, f"{nome_cliente},", align='L')
@@ -388,6 +343,7 @@ def gerar_pdf(grafico_receita, grafico_receita_despesa, grafico_patrimonio, graf
     
     return gen_pdf
 
+
 st.markdown('### Núcelo Familiar')
 col1, col2, col3, col4 = st.columns(4)
 with col1:
@@ -398,7 +354,7 @@ with col2:
     
 with col3:
     nascimento_cliente = st.date_input('Data de Nascimento', format='DD/MM/YYYY')
-    idade_cliente = calcula_idade(nascimento_cliente)  
+    idade_cliente = utils.calcula_idade(nascimento_cliente)  
     st.write(str(idade_cliente), 'anos')
     
 with col4:
@@ -416,7 +372,7 @@ if estado_civil == 'Casado(a) / União Estável':
         
     with col3:
         nascimento_conjuge = st.date_input('Data de Nascimento Cônjuge', format='DD/MM/YYYY')
-        idade_conjuge = calcula_idade(nascimento_conjuge)
+        idade_conjuge = utils.calcula_idade(nascimento_conjuge)
         st.write(str(idade_conjuge), 'anos')
         
     with col4:
@@ -430,25 +386,25 @@ if filhos == 'Sim':
     with col1:
         nome_filho1 = st.text_input('Nome Filho(a)', key='nome_filho1')
         nascimento_filho1 = st.date_input('Data de Nascimento Filho(a)', format='DD/MM/YYYY', key='nascim_filho1')
-        idade_filho1 = calcula_idade(nascimento_filho1)
+        idade_filho1 = utils.calcula_idade(nascimento_filho1)
         st.write(str(idade_filho1), 'anos')
         
     with col2:
         nome_filho2 = st.text_input('Nome Filho(a)', key='nome_filho2')
         nascimento_filho2 = st.date_input('Data de Nascimento Filho(a)', format='DD/MM/YYYY', key='nascimento_filho2')
-        idade_filho2 = calcula_idade(nascimento_filho2)
+        idade_filho2 = utils.calcula_idade(nascimento_filho2)
         st.write(str(idade_filho2), 'anos')
         
     with col3:
         nome_filho3 = st.text_input('Nome Filho(a)', key='nome_filho3')
         nascimento_filho3 = st.date_input('Data de Nascimento Filho(a)', format='DD/MM/YYYY', key='nascim_filho3')
-        idade_filho3 = calcula_idade(nascimento_filho3)
+        idade_filho3 = utils.calcula_idade(nascimento_filho3)
         st.write(str(idade_filho3), 'anos')
 
     with col4:
         nome_filho4 = st.text_input('Nome Filho(a)', key='nome_filho4')
         nascimento_filho4 = st.date_input('Data de Nascimento Filho(a)', format='DD/MM/YYYY', key='nascim_filho4')
-        idade_filho4 = calcula_idade(nascimento_filho4)
+        idade_filho4 = utils.calcula_idade(nascimento_filho4)
         st.write(str(idade_filho4), 'anos')
 st.markdown('---')
 

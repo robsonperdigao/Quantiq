@@ -3,7 +3,7 @@ import fundamentus as fd
 import quantstats as qs
 from datetime import datetime, timedelta
 import pandas as pd
-
+from src import utils
 
 
 def periodo_analise(data):
@@ -41,7 +41,7 @@ periodo_dict = {'3 meses': '3mo',
 
 tab1, tab2 = st.tabs(['Ativo único', 'Carteira'])
 with tab1:
-    acao = st.selectbox('Ativo da carteira', [i + '.SA' for i in fd.list_papel_all()], placeholder='Digite o nome da ação')
+    acao = st.selectbox('Ativo da carteira', [i + '.SA' for i in utils.lista_ativos_b3()], placeholder='Digite o nome da ação')
     benchmark = benchmark_dict[st.selectbox('Selecione o Benchmark', benchmark_dict.keys())]
     periodo = periodo_dict[st.selectbox('Selecione o período de análise', periodo_dict.keys())]
     carteira = qs.utils.download_returns(acao)
@@ -51,7 +51,7 @@ with tab1:
         
         
 with tab2:
-    acoes= st.multiselect('Ativo da carteira', [i + '.SA' for i in fd.list_papel_all()], placeholder='Digite o nome da ação')
+    acoes= st.multiselect('Ativo da carteira', [i + '.SA' for i in utils.lista_ativos_b3()], placeholder='Digite o nome da ação')
     portfolio = {}
     for acao in acoes:
         portfolio[acao] = 1/len(acoes)

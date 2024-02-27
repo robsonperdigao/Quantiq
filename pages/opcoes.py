@@ -6,35 +6,9 @@ import datetime as dt
 from datetime import date, datetime
 import datetime as dt
 from workadays import workdays as wd
+from src import utils
 
-# Lista as empresas da B3
-def lista_empresas():
-    """
-    Papel: Get list of tickers
-      URL:
-        http://fundamentus.com.br/detalhes.php
 
-    Output:
-      list
-    """
-
-    url = 'http://fundamentus.com.br/detalhes.php'
-    header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201',
-           'Accept': 'text/html, text/plain, text/css, text/sgml, */*;q=0.01',
-           'Accept-Encoding': 'gzip, deflate',
-           }
-    r = requests.get(url, headers=header)
-    df = pd.read_html(r.text)[0]
-
-    return list(df['Papel'])
-
-# Coleta as opções com todos os vencimentos
-def opt_all(ativo):
-    url = f'https://opcoes.net.br/listaopcoes/completa?idLista=ML&idAcao={ativo}&listarVencimentos=true&cotacoes=true'
-    r = requests.get(url).json()
-    vencimentos = [i['value'] for i in r['data']['vencimentos']]
-    df = pd.concat([coleta_opcoes(ativo, vencimento) for vencimento in vencimentos])
-    return df
 
 # Mostrar tabela de operações
 def mostra_operacoes():
@@ -122,7 +96,7 @@ def collar_alta(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_p
     df['custo'] = round((preco_ativo + df['preco_put'] - df['preco_call']) * quantidade, 2)
     df['corretagem'] = round((df['custo'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem, 2)
     df['corretagem %'] = round(df['corretagem'] / df['custo'] * 100, 2)
-    df['risco %'] = risco
+    df['risco %'] = float(risco)
     df['lucro minimo'] = round(df['strike_put'] * quantidade - df['custo'], 2)
     df['lucro min %'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
     df['lucro maximo'] = round(df['strike_call'] * quantidade - df['custo'], 2)
@@ -155,7 +129,7 @@ def collar_baixa(ativo, vencimento, quantidade = 1, volume_put = 0.01, negocios_
     df['custo'] = round((preco_ativo + df['preco_put'] - df['preco_call']) * quantidade, 2)
     df['corretagem'] = round((df['custo'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem, 2)
     df['corretagem %'] = round(df['corretagem'] / df['custo'] * 100, 2)
-    df['risco %'] = risco
+    df['risco %'] = float(risco)
     df['lucro minimo'] = round(df['strike_call'] * quantidade - df['custo'], 2)
     df['lucro min %'] = round(df['lucro minimo'] / df['custo'] * 100, 2)
     df['lucro maximo'] = round(df['strike_put'] * quantidade - df['custo'], 2)
@@ -189,7 +163,7 @@ st.markdown('---')
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    ativos = lista_empresas()
+    ativos = utils.lista_ativos_b3()
     ativos.append('BOVA11')
     ativo = st.selectbox('Selecione o ativo', ativos, index=None, placeholder='Digite ou selecione')
 with col2:

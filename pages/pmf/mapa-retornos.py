@@ -1,31 +1,11 @@
 import streamlit as st
-import requests
 import pandas as pd
 import yfinance as yf
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.graph_objects as go
-from datetime import date
+from src import utils
 
-def lista_empresas():
-    """
-    Papel: Get list of tickers
-      URL:
-        http://fundamentus.com.br/detalhes.php
-
-    Output:
-      list
-    """
-
-    url = 'http://fundamentus.com.br/detalhes.php'
-    header = {'User-agent': 'Mozilla/5.0 (Windows; U; Windows NT 6.1; rv:2.2) Gecko/20110201',
-           'Accept': 'text/html, text/plain, text/css, text/sgml, */*;q=0.01',
-           'Accept-Encoding': 'gzip, deflate',
-           }
-    r = requests.get(url, headers=header)
-    df = pd.read_html(r.text)[0]
-
-    return list(df['Papel'])
 
 st.set_page_config(page_title='Mapa de Retornos Mensais', 
                    page_icon='📈',
@@ -47,7 +27,7 @@ if opcao == 'Índices':
         analisar = st.form_submit_button('Analisar')
 else:
     with st.form(key = 'form_acoes'):
-        ticker = st.selectbox('Ações', [i + '.SA' for i in lista_empresas()])
+        ticker = st.selectbox('Ações', [i + '.SA' for i in utils.lista_ativos_b3()])
         analisar = st.form_submit_button('Analisar')
         
 if analisar:
