@@ -16,3 +16,4 @@ quantstats
 IPython
 workadays
 collections
+holidays

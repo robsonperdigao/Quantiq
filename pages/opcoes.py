@@ -167,7 +167,11 @@ with col1:
     ativos.append('BOVA11')
     ativo = st.selectbox('Selecione o ativo', ativos, index=None, placeholder='Digite ou selecione')
 with col2:
-    vencimento = st.date_input('Data de vencimento das opções', format='DD/MM/YYYY')
+    vencimentos = utils.todos_vencimentos()
+    
+    vencimento = st.selectbox('Selecione a data de vencimento das opções', vencimentos)
+    vencimento = datetime.strptime(vencimento, '%d/%m/%Y').date()
+    #vencimento = st.date_input('Data de vencimento das opções', format='DD/MM/YYYY')
 with col3:
     quantidade = st.number_input('Quantidade', min_value=1, step=1, value=100)
 with col4:

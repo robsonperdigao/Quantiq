@@ -2,9 +2,12 @@ import pandas as pd
 from collections import OrderedDict
 import requests
 import streamlit as st
-from datetime import date
+from datetime import date, datetime, timedelta
 from fpdf import FPDF
 import tempfile
+import holidays
+from workadays import workdays as wd
+
 
 
 def from_pt_br(val):
@@ -634,5 +637,90 @@ def gerar_pdf(grafico_receita, grafico_receita_despesa, grafico_patrimonio, graf
     return gen_pdf
 
 
+# Lista as datas de vencimentos semanais
+def vencimento_semanal():
+    # Obter o mês e ano atuais
+    mes_atual = datetime.now().month
+    ano_atual = datetime.now().year
+    ano_fim = ano_atual + 1
+     
+    sextas_feiras = []
+    # Criar um objeto de feriados para o Brasil
+    brazil_holidays = holidays.Brazil(years=[ano_atual, ano_fim])
+    
+    for ano in range(ano_atual, ano_fim):
+        for mes in range(mes_atual, mes_atual + 13):
+            # Ajustar o mês se ele ultrapassar 12
+            if mes > 12:
+                mes -= 12
+                ano += 1
+            # Obter o primeiro dia do mês
+            primeiro_dia = datetime(ano, mes, 1)
+            # Encontrar a sexta-feira do mês
+            sexta_feira = primeiro_dia + timedelta(days=(4 - primeiro_dia.weekday()) % 7)
+            # Verificar se a sexta-feira é um feriado brasileiro
+            while sexta_feira.month == mes:
+                # Verificar se a sexta-feira é um feriado brasileiro
+                if sexta_feira in brazil_holidays:
+                    # Se for um feriado, retornar o dia útil anterior
+                    sexta_feira = sexta_feira - timedelta(days=1)
+                    while sexta_feira.weekday() >= 5: # Enquanto for fim de semana
+                        sexta_feira -= timedelta(days=1)
+                sextas_feiras.append(sexta_feira)
+                # Avançar para a próxima sexta-feira
+                sexta_feira += timedelta(days=7)
+    
+    vencimentos_semanais = [data.strftime('%Y-%m-%d') for data in sextas_feiras]
+    vencimentos_semanais = [datetime.strptime(data, '%Y-%m-%d').date() for data in vencimentos_semanais]
+    
+    return vencimentos_semanais
+
+
+def vencimentos_opcoes_acoes():
+    # Obter o mês e ano atuais
+    mes_atual = datetime.now().month
+    ano_atual = datetime.now().year
+    ano_fim = ano_atual + 1
+     
+    terceiras_sextas = []
+    # Criar um objeto de feriados para o Brasil
+    brazil_holidays = holidays.Brazil(years=[ano_atual, ano_fim])
+    
+    for ano in range(ano_atual, ano_fim):
+        for mes in range(mes_atual, mes_atual + 13):
+            # Ajustar o mês se ele ultrapassar 12
+            if mes > 12:
+                mes -= 12
+                ano += 1
+            # Obter o primeiro dia do mês
+            primeiro_dia = datetime(ano, mes, 1)
+            # Encontrar a terceira sexta-feira
+            terceira_sexta = primeiro_dia + timedelta(days=(4 - primeiro_dia.weekday()) % 7 + 14)
+            # Verificar se a terceira sexta-feira é no mesmo mês
+            if terceira_sexta.month == mes:
+                # Verificar se a terceira sexta-feira é um feriado brasileiro
+                if terceira_sexta in brazil_holidays:
+                    # Se for um feriado, retornar o dia útil anterior
+                    terceira_sexta = terceira_sexta - timedelta(days=1)
+                    while terceira_sexta.weekday() >= 5: # Enquanto for fim de semana
+                        terceira_sexta -= timedelta(days=1)
+                terceiras_sextas.append(terceira_sexta)
+
+    vencimentos_acoes = [data.strftime('%Y-%m-%d') for data in terceiras_sextas]
+    vencimentos_acoes = [datetime.strptime(data, '%Y-%m-%d').date() for data in vencimentos_acoes]
+
+    return vencimentos_acoes
+
+
+def todos_vencimentos():
+    vencimentos_semanais = vencimento_semanal()
+    vencimentos_acoes = vencimentos_opcoes_acoes()
+    vencimentos = vencimentos_semanais.copy()
+    for data in vencimentos_acoes:
+        if data not in vencimentos_semanais:
+            vencimentos.append(data)
+    vencimentos = [data.strftime('%d/%m/%Y') for data in vencimentos]
+    
+    return vencimentos
 
 
