@@ -48,7 +48,7 @@ def coleta_opcoes(ativo, vencimento):
     r = requests.get(url).json()
     x = ([ativo, vencimento, i[0].split('_')[0], i[2], i[3], i[5], i[8], i[9], i[10], i[11]] for i in r['data']['cotacoesOpcoes'])
     df = pd.DataFrame(x, columns=['ativo', 'vencimento', 'ticker', 'tipo', 'modelo', 'strike', 'preco', 'negocios', 'volume', 'data ult'])
-    df['data ult'] = df['data ult'].apply(lambda x: datetime.strptime(x, '%d/%m/%Y').date() if isinstance(x, str) else None)
+    df['data ult'] = pd.to_datetime(df['data ult'], dayfirst=True).dt.date
     
     # Cria um dataframe somente com as PUTs
     df_put = df[df['tipo'] == 'PUT']
