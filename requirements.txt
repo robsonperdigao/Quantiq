@@ -15,5 +15,4 @@ st-pages
 quantstats
 IPython
 workadays
-collections
 holidays
