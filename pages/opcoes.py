@@ -40,7 +40,9 @@ def calcula_cdi(vencimento):
 
 def coleta_opcoes(ativo, vencimento):
     # Coleta o preço do ativo com base no último fechamento
-    preco_ativo = round(yf.download(ativo +'.SA', period='1d')['Adj Close'].iloc[-1], 2)
+    
+    preco_ativo = round(yf.download(ativo +'.SA')['Adj Close'].iloc[-1], 2)
+    
     
     # Coleta informações das opções
     url = f'https://opcoes.net.br/listaopcoes/completa?idAcao={ativo}&listarVencimentos=false&cotacoes=true&vencimentos={vencimento}'
@@ -226,14 +228,20 @@ button = st.button('Ver as estratégias')
 with st.container():
     if button:
         if estrutura == 'Collar de Alta':
-            df, df_put, df_call, df_op = collar(ativo, vencimento, operacao='collar_alta', filtro_data=filtro_data, risco=risco, 
-                                                     corretagem_variavel=corretagem_variavel, corretagem_ordem=corretagem_ordem)
-            mostra_operacoes()
+            try:
+                df, df_put, df_call, df_op = collar(ativo, vencimento, operacao='collar_alta', filtro_data=filtro_data, risco=risco, 
+                                                        corretagem_variavel=corretagem_variavel, corretagem_ordem=corretagem_ordem)
+                mostra_operacoes()
+            except:
+                st.warning(f"Erro ao baixar dados para {ativo}. Escolha outro ativo")
+
         elif estrutura == 'Collar de Baixa':
-            df, df_put, df_call, df_op = collar(ativo, vencimento, operacao='collar_baixa', filtro_data=filtro_data, risco=risco, 
-                                                     corretagem_variavel=corretagem_variavel, corretagem_ordem=corretagem_ordem)
-            mostra_operacoes()
-            
+            try:
+                df, df_put, df_call, df_op = collar(ativo, vencimento, operacao='collar_baixa', filtro_data=filtro_data, risco=risco, 
+                                                        corretagem_variavel=corretagem_variavel, corretagem_ordem=corretagem_ordem)
+                mostra_operacoes()
+            except:
+                st.warning(f"Erro ao baixar dados para {ativo}. Escolha outro ativo")
 
         st.markdown('---')
 
