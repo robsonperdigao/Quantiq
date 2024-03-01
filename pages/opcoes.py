@@ -47,7 +47,8 @@ def coleta_opcoes(ativo, vencimento):
     r = requests.get(url).json()
     x = ([ativo, vencimento, i[0].split('_')[0], i[2], i[5], i[8], i[9], i[10], i[11]] for i in r['data']['cotacoesOpcoes'])
     df = pd.DataFrame(x, columns=['Ativo', 'Vencimento', 'Ticker', 'Tipo', 'Strike', 'Preço', 'Negócios', 'Volume', 'Último Negócio'])
-    df['Último Negócio'] = pd.to_datetime(df['Último Negócio'], dayfirst=True).dt.date
+    df['Último Negócio'] = pd.to_datetime(df['Último Negócio'], format="%d/%m/%Y").dt.date
+    
     
     # Cria um dataframe somente com as PUTs
     df_put = df[df['Tipo'] == 'PUT']
@@ -77,7 +78,7 @@ def coleta_opcoes(ativo, vencimento):
     }, inplace=True)
 
     # Cria um dataframe com as operações possíveis para cada PUT
-    df = pd.merge(df_put_op, df_call_op, on='Ativo', suffixes=('', '_call'))
+    df = pd.merge(df_put_op, df_call_op, on='Ativo')
     df['Preço Ativo'] = preco_ativo
     
     return df, df_put, df_call, preco_ativo
@@ -98,8 +99,7 @@ def collar(ativo, vencimento, operacao='collar_alta', quantidade = 1, volume_put
         tx_b3 = 0.134
     else:
         tx_b3 = 0.00
-    filtro_data = datetime.strptime(filtro_data, '%Y-%m-%d').date()
-
+    
     df['Custo Operação'] = round((preco_ativo + df['Preço Put'] - df['Preço Call']) * quantidade, 2)
     df['Corretagem'] = round((df['Custo Operação'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem, 2)
     df['Corretagem (%)'] = round(df['Corretagem'] / df['Custo Operação'] * 100, 2)
@@ -218,7 +218,7 @@ with st.expander('Filtros', expanded=False):
             # Subtrair um dia até encontrar um dia útil
             default_date = default_date - dt.timedelta(days=1)
         filtro_data = default_date
-        #filtro_data = st.date_input('Data último negócio', default_date, format='DD/MM/YYYY')
+                #filtro_data = st.date_input('Data último negócio', default_date, format='DD/MM/YYYY')
 
 st.write('')
 button = st.button('Ver as estratégias')
