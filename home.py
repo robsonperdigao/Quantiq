@@ -13,7 +13,7 @@ def main():
             Page('home.py', 'Home', '🏠'),
             #Section("Planejamento", '📊'),
             Page('pages/planner.py', 'Planejamento Financeiro', '📊'),
-            #Page('pages/is/fpclient.py', 'Exemplo FPClient', '📝'),
+            Page('pages/is/fpclient.py', 'Exemplo Plan. Financeiro', '📝'),
             #Section("Quantiq", '💲'),
             Page('pages/opcoes.py', 'Estratégias com Opções', '❇️'),
             Page('pages/comparador_rentabilidade.py', 'Comparador de Rentabilidade', '🏅'),
