@@ -133,7 +133,7 @@ def collar(ativo, vencimento, operacao='collar_alta', quantidade = 1, volume_put
     df_op = df_op[df_op['Negócios Call'] >= negocios_call]
     df_op = df_op[df_op['Último Negócio Put'] >= filtro_data]
     df_op = df_op[df_op['Último Negócio Call'] >= filtro_data]
-    df_op = df_op.sort_values(by='Lucro Mín (%)',ascending=True)
+    df_op = df_op.sort_values(by='Lucro Mín (%)',ascending=False)
     df_op = df_op.drop(columns=['Tipo Put', 'Volume Put', 
                                 'Tipo Call','Volume Call', 
                                 'Corretagem', 'Corretagem (%)',
