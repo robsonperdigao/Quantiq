@@ -98,6 +98,7 @@ def collar(ativo, vencimento, operacao='collar_alta', quantidade = 1, volume_put
         tx_b3 = 0.134
     else:
         tx_b3 = 0.00
+    filtro_data = datetime.strptime(filtro_data, '%Y-%m-%d').date()
 
     df['Custo Operação'] = round((preco_ativo + df['Preço Put'] - df['Preço Call']) * quantidade, 2)
     df['Corretagem'] = round((df['Custo Operação'] * ((corretagem_variavel + tx_b3) / 100)) + 6 * corretagem_ordem, 2)
@@ -142,7 +143,8 @@ def collar(ativo, vencimento, operacao='collar_alta', quantidade = 1, volume_put
     for col in data_columns:
         df_op[col] = pd.to_datetime(df_op[col]).dt.strftime('%d/%m/%Y')
     
-    real_columns = ['Strike Put', 'Preço Put', 'Strike Call', 'Preço Call', 'Preço Ativo', 'Custo Operação']
+    real_columns = ['Strike Put', 'Preço Put', 'Strike Call', 'Preço Call', 
+                    'Preço Ativo', 'Custo Operação']
     for col in real_columns:
         df_op[col] = df_op[col].apply(lambda x: "R$ " + str(x).replace('.', ',') if pd.notnull(x) else x)
     
