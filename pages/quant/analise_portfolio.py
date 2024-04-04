@@ -4,6 +4,13 @@ import quantstats as qs
 from datetime import datetime, timedelta
 import pandas as pd
 from src import utils
+from pandas_datareader import data as pdr
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
+import datetime as dt
+from scipy.optmize import minimize
+
 
 
 def periodo_analise(data):

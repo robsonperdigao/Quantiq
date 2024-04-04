@@ -449,12 +449,12 @@ def calcula_idade(nascimento):
 
 class PDFWithFooter(FPDF):
     def header(self):
-        self.image('img/logo_investsmart.png', x=65, y=5, w=84, h=22)
+        self.image('img/QUANTIQ.png', x=65, y=5, w=84, h=22)
         
     def footer(self):
         self.set_y(-15)
         self.set_font('Helvetica', 'I',size=9)
-        self.cell(0, 4, 'robson.perdigao@solutiadigital.com.br     |     11 98047-3370     |     www.solutiadigital.com.br', align='L')
+        self.cell(0, 4, 'robson.perdigao@quantiq.trade     |     11 98047-3370     |     www.quantiq.trade', align='C')
 
 def gerar_pdf(grafico_receita, grafico_receita_despesa, grafico_patrimonio, grafico_geren_risco, grafico_consol):
     
@@ -486,7 +486,7 @@ def gerar_pdf(grafico_receita, grafico_receita_despesa, grafico_patrimonio, graf
     pdf.multi_cell(0, 9, f"Diagnóstico do Cliente\n{nome_cliente}", align='C')
     pdf.multi_cell(0, 18, ' ', align='C')
     pdf.set_font('Helvetica', size=14)
-    pdf.multi_cell(0, 9, f"Assessor de Investimentos\nRobson Perdigão Assessor", align='C')
+    #pdf.multi_cell(0, 9, f"Assessor de Investimentos\nRobson Perdigão Assessor", align='C')
     pdf.multi_cell(0, 100, ' ', align='C')
     pdf.multi_cell(0, 9, f'{mes_em_portugues}/{ano}', align='C')
     
@@ -499,8 +499,9 @@ def gerar_pdf(grafico_receita, grafico_receita_despesa, grafico_patrimonio, graf
     pdf.set_font('Helvetica', 'B', size=12)
     pdf.multi_cell(0, 9, f"{nome_cliente},", align='L')
     pdf.set_font('Helvetica', size=12)
-    pdf.multi_cell(0, 9, f"Esse estudo foi desenvolvido exclusivamente para você.\n\nConsiderei sua capacidade de poupança para atingir seus objetivos de curto, médio e longo prazo, adequando esses períodos ao atual cenário econômico. Conforme discutimos, é importante levar em conta sua necessidade cotidiana, orçamento pessoal, passando por rentabilidade e riscos de seus investimentos.", align='L')
-    pdf.multi_cell(0, 9, f"\nMinha meta é te assessorar para que você encontre os melhores investimentos direcionados ao seu perfil e consiga fazer com que seu dinheiro renda para garantir a realização de seus planos de vida. Para isso, precisaremos de um acompanhamento e troca de informações constantes.", align='L')
+    pdf.multi_cell(0, 9, f"Esse estudo foi desenvolvido exclusivamente para você.\n\nFoi considerado sua capacidade de poupança para atingir seus objetivos de curto, médio e longo prazo, adequando esses períodos ao atual cenário econômico. Lembre-se que é importante levar em conta sua necessidade cotidiana, orçamento pessoal, passando por rentabilidade e riscos de seus investimentos.", align='L')
+    pdf.multi_cell(0, 9, f"\nO principal objetivo deste planejamento é que você encontre os melhores investimentos direcionados ao seu perfil e consiga fazer com que seu dinheiro renda para garantir a realização de seus planos de vida. Para isso, precisaremos de um acompanhamento e troca de informações constantes.", align='L')
+    pdf.multi_cell(0, 9, f"\nA seguir você encontrará todas as informações coletadas e organizadas para seguir um bom planejamento financeiro, bem como os próximos passos que você deverá seguir.", align='L')
     
     
     # Página 2
@@ -577,7 +578,7 @@ def gerar_pdf(grafico_receita, grafico_receita_despesa, grafico_patrimonio, graf
         pdf.cell(0, 9, 'Custos com Dependentes')
         pdf.ln(20)
         pdf.set_font('Helvetica', size=12)
-        pdf.multi_cell(0, 9, f"Devido aos custos com {nome_filho1}, os recursos necessários serão de R$ {vlr_nec_educ1:.2f} até os {prz_term_estudos1:.2f} anos.", align='L')  
+        pdf.multi_cell(0, 9, f"Devido aos custos com {nome_filho1}, os recursos necessários serão de R$ {vlr_nec_educ1:.2f} até os {prz_term_estudos1:.0f} anos.", align='L')  
         
     if grafico_geren_risco is not None:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
