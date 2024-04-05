@@ -37,11 +37,15 @@ with st.form('batalha'):
 
         df = pd.merge(info_papel1, info_papel2, how='outer')
         st.dataframe(df)
+        vencedor, pontos = utils.vencedor_batalha(df=df)
+        st.write(vencedor)
+        st.write(pontos)
         colunas_menor = ['PL', 'PVP', 'PEBIT', 'PSR', 'PAtivos', 'PCap_Giro', 'PAtiv_Circ_Liq',
                          'EV_EBITDA', 'EV_EBIT', 'VPA', 'Liquidez_Corr', 'Div_Br_Patrim', 'Giro_Ativos']
         colunas_maior = ['Div_Yield', 'Cres_Rec_5a', 'LPA', 'Marg_Bruta', 'Marg_EBIT', 'Marg_Liquida',
                          'EBIT_Ativo', 'ROIC', 'ROE']
         df_comparativo = df.copy()
+        
         df_comparativo['Resultado'] = 0
         for coluna in colunas_menor:
              comparacao = df_comparativo[coluna]

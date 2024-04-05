@@ -677,3 +677,41 @@ def vencimentos_opcoes():
     return vencimentos
 
 
+def vencedor_batalha(df):
+    # Agrupando os indicadores em dois grupos: os que devem ser menores e os que devem ser maiores
+    indicadores_menores = ['PL', 'PVP', 'PEBIT', 'PSR', 'PAtivos', 'PCap_Giro', 'PAtiv_Circ_Liq', 'EV_EBITDA', 'EV_EBIT', 'VPA', 'Liquidez_Corr', 'Div_Br_Patrim', 'Giro_Ativos']
+    indicadores_maiores = ['Div_Yield', 'Cres_Rec_5a', 'LPA', 'Marg_Bruta', 'Marg_EBIT', 'Marg_Liquida', 'EBIT_Ativo', 'ROIC', 'ROE']
+    
+    # Inicializando os contadores de pontos para cada ativo
+    pontos_ativo1 = 0
+    pontos_ativo2 = 0
+    
+    # Supondo que os ativos estejam nas primeiras duas linhas do DataFrame
+    ativo1 = df.iloc[0]
+    ativo2 = df.iloc[1]
+    
+    # Iterando sobre os indicadores para comparar os valores
+    for indicador in indicadores_menores + indicadores_maiores:
+        if indicador in indicadores_menores:
+            if ativo1[indicador] < ativo2[indicador]:
+                pontos_ativo1 += 1
+            elif ativo2[indicador] < ativo1[indicador]:
+                pontos_ativo2 += 1
+        elif indicador in indicadores_maiores:
+            if ativo1[indicador] > ativo2[indicador]:
+                pontos_ativo1 += 1
+            elif ativo2[indicador] > ativo1[indicador]:
+                pontos_ativo2 += 1
+    
+    # Determinando o vencedor com base nos pontos
+    if pontos_ativo1 > pontos_ativo2:
+        vencedor = ativo1['Papel']
+        pontos = pontos_ativo1
+    elif pontos_ativo2 > pontos_ativo1:
+        vencedor = ativo2['Papel']
+        pontos = pontos_ativo2
+    else:
+        vencedor = "Empate"
+        pontos = pontos_ativo1
+    
+    return vencedor, pontos
