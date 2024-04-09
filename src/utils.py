@@ -706,12 +706,18 @@ def vencedor_batalha(df):
     # Determinando o vencedor com base nos pontos
     if pontos_ativo1 > pontos_ativo2:
         vencedor = ativo1['Papel']
-        pontos = pontos_ativo1
+        perdedor = ativo2['Papel']
+        pontos_vencedor = pontos_ativo1
+        pontos_perdedor = pontos_ativo2
     elif pontos_ativo2 > pontos_ativo1:
         vencedor = ativo2['Papel']
-        pontos = pontos_ativo2
+        perdedor = ativo1['Papel']
+        pontos_vencedor = pontos_ativo2
+        pontos_perdedor = pontos_ativo1
     else:
-        vencedor = "Empate"
-        pontos = pontos_ativo1
+        vencedor = 'Empate'
+        perdedor = 'Empate'
+        pontos_vencedor = pontos_ativo1
+        pontos_perdedor = pontos_ativo2
     
-    return vencedor, pontos
+    return vencedor, perdedor, pontos_vencedor, pontos_perdedor

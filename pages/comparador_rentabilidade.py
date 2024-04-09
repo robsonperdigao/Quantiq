@@ -64,6 +64,7 @@ st.markdown('---')
 
 selic_ano, cdi_ano, ipca_ano = utils.calcula_indicadores_macro()
 with st.container():
+    st.markdown('### Indicadores macro')
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric('Selic Anual', f'{selic_ano:.2f}%')
@@ -71,8 +72,10 @@ with st.container():
         st.metric('CDI Anual', f'{cdi_ano:.2f}%')
     with col3:
         st.metric('IPCA Anual', f'{ipca_ano:.2f}%')
-        
+st.markdown('---')
+
 with st.container():
+    st.markdown('### Informações dos ativos')
     col1, col2, col3 = st.columns(3)
     with col1:
         vlr = st.number_input('Valor da aplicação')
@@ -83,11 +86,11 @@ with st.container():
     col1, col2 = st.columns(2)
     with col1:
         with st.expander('Ativo 1', expanded=True):
-            ativo1, ativo1_vlr_liq_resg, ativo1_rent_liq = comparativo('ativo1')
+            ativo1, ativo1_vlr_liq_resg, ativo1_rent_liq = comparativo('ativo1')     
     with col2:
         with st.expander('Ativo 2', expanded=True):
             ativo2, ativo2_vlr_liq_resg, ativo2_rent_liq = comparativo('ativo2')
-
+        
 with st.container():
     col1, col2, col3, col4 = st.columns(4)
     if ativo1_vlr_liq_resg > ativo2_vlr_liq_resg:

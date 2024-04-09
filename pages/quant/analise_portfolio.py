@@ -1,15 +1,13 @@
 import streamlit as st
-import fundamentus as fd
 import quantstats as qs
 from datetime import datetime, timedelta
 import pandas as pd
 from src import utils
-from pandas_datareader import data as pdr
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 import datetime as dt
-from scipy.optmize import minimize
+import yfinance as yf
 
 
 
@@ -23,6 +21,18 @@ def periodo_analise(data):
 
     dias = len(intervalo_datas[(intervalo_datas.dayofweek < 5)])
     return f'{dias}d'
+
+def plot_comparison(acao_returns, benchmark_returns):
+    plt.figure(figsize=(12, 6))
+    
+    plt.plot(acao_returns.index, acao_returns.values, label='Ação')
+    plt.plot(benchmark_returns.index, benchmark_returns.values, label='Benchmark')
+    
+    plt.title('Comparação de Retornos Acumulados')
+    plt.xlabel('Data')
+    plt.ylabel('Retorno Acumulado')
+    plt.legend()
+    plt.show()
 
 
 st.set_page_config(page_title='Análise de Carteira',
@@ -46,26 +56,25 @@ periodo_dict = {'3 meses': '3mo',
                 '5 anos': '5y',
                 'Desde início': 'max'}
 
-tab1, tab2 = st.tabs(['Ativo único', 'Carteira'])
-with tab1:
-    acao = st.selectbox('Ativo da carteira', [i + '.SA' for i in utils.lista_ativos_b3()], placeholder='Digite o nome da ação')
-    benchmark = benchmark_dict[st.selectbox('Selecione o Benchmark', benchmark_dict.keys())]
-    periodo = periodo_dict[st.selectbox('Selecione o período de análise', periodo_dict.keys())]
-    carteira = qs.utils.download_returns(acao)
-    carteira
-    col1, col2, col3, col4 = st.columns(4)
-    
+
+
         
         
-with tab2:
-    acoes= st.multiselect('Ativo da carteira', [i + '.SA' for i in utils.lista_ativos_b3()], placeholder='Digite o nome da ação')
-    portfolio = {}
-    for acao in acoes:
-        portfolio[acao] = 1/len(acoes)
-    portfolio
 
+ativos = st.multiselect('Ativos da carteira', utils.lista_ativos_b3(), placeholder='Digite o nome da ação', key='carteira')
+ativos = [i + '.SA' for i in ativos]
+ativos
+
+
+benchmark = benchmark_dict[st.selectbox('Selecione o Benchmark', benchmark_dict.keys(), key='benchmark_carteira')]
+data_ini = st.date_input('Digite a data de início', format='DD/MM/YYYY')
+#periodo = periodo_dict[st.selectbox('Selecione o período de análise', periodo_dict.keys(), key='periodo_carteira')]
+#retorno_benchmark = qs.utils.download_returns(benchmark, period=periodo)
     
 
-    benchmark = benchmark_dict[st.selectbox('Selecione o Benchmark', benchmark_dict.keys())]
+precos = yf.download(ativos, start=data_ini)['Adj Close']
+precos
 
-    periodo = periodo_dict[st.selectbox('Selecione o período de análise', periodo_dict.keys())]
+
+col1, col2, col3, col4 = st.columns(4)
+  
