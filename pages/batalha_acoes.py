@@ -62,9 +62,9 @@ with st.form('batalha'):
             vencedor, perdedor, pontos_vencedor, pontos_perdedor = utils.vencedor_batalha(df=df)
             col1, col2, col3, col4 = st.columns(4)
             with col2:
-                st.metric('Vencedor', vencedor)
+                st.metric('🟢 Vencedor 🟢', vencedor)
                 st.metric('Pontos', pontos_vencedor)
             with col3:
-                st.metric('Perdedor', perdedor)
+                st.metric('🔴 Perdedor 🔴', perdedor)
                 st.metric('Pontos', pontos_perdedor)
         

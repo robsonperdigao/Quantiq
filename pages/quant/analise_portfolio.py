@@ -46,7 +46,10 @@ st.markdown('---')
 qs.extend_pandas()
 benchmark_dict = {'Ibovespa': '^BVSP', 
                 'CDI': 'CDI',
-                'Dólar': 'Dólar'}
+                'Dólar': 'USDBRL=X'}
+
+benchmark_dict = {'Ibovespa': '^BVSP',
+                'Dólar': 'USDBRL=X'}
 
 periodo_dict = {'3 meses': '3mo',
                 '6 meses': '6mo',
@@ -57,24 +60,41 @@ periodo_dict = {'3 meses': '3mo',
                 'Desde início': 'max'}
 
 
-
-        
-        
-
 ativos = st.multiselect('Ativos da carteira', utils.lista_ativos_b3(), placeholder='Digite o nome da ação', key='carteira')
 ativos = [i + '.SA' for i in ativos]
-ativos
 
-
-benchmark = benchmark_dict[st.selectbox('Selecione o Benchmark', benchmark_dict.keys(), key='benchmark_carteira')]
-data_ini = st.date_input('Digite a data de início', format='DD/MM/YYYY')
+benchmarks = st.multiselect('Selecione o(s) Benchmark(s)', benchmark_dict.keys(), key='benchmark_carteira')
+data_ini = st.date_input('Digite a data de início da análise', format='DD/MM/YYYY')
 #periodo = periodo_dict[st.selectbox('Selecione o período de análise', periodo_dict.keys(), key='periodo_carteira')]
 #retorno_benchmark = qs.utils.download_returns(benchmark, period=periodo)
     
 
 precos = yf.download(ativos, start=data_ini)['Adj Close']
-precos
+precos['Carteira'] = precos.sum(axis = 1)
+retornos = precos/precos.iloc[0]
+retornos = retornos.dropna()
+carteira = retornos['Carteira']
+retornos = retornos.drop(['Carteira'], axis = 1)
+st.line_chart(retornos)
+
+consolidado = pd.DataFrame()
+
+for benchmark in benchmarks:
+    benchmark_ticker = benchmark_dict[benchmark]
+    precos_benchmark = yf.download(benchmark_ticker, start=data_ini)['Adj Close']
+    retornos_benchmark = precos_benchmark/precos_benchmark[0]
+    consolidado_benchmark = pd.merge(carteira, retornos_benchmark, how='inner', on='Date')
+    consolidado_benchmark.rename(columns={'Adj Close': benchmark}, inplace=True)
+    consolidado = pd.merge(consolidado, consolidado_benchmark, how='outer', left_index=True, right_index=True)
+
+consolidado = consolidado.drop(columns=['Carteira_x', 'Carteira_y'], axis=1)
+consolidado = pd.merge(consolidado, carteira, how='outer', left_index=True, right_index=True)
+st.line_chart(consolidado)
 
 
-col1, col2, col3, col4 = st.columns(4)
+
+
+precos_primeiro_dia = precos.iloc[0]
+
+
   
