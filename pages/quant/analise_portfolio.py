@@ -10,18 +10,6 @@ import datetime as dt
 import yfinance as yf
 
 
-
-def periodo_analise(data):
-    data_atual = datetime.now().strftime("%Y-%m-%d")
-
-    data = datetime.strptime(str(data), "%Y-%m-%d")
-    data_atual = datetime.strptime(data_atual, "%Y-%m-%d")
-
-    intervalo_datas = pd.date_range(data, data_atual)
-
-    dias = len(intervalo_datas[(intervalo_datas.dayofweek < 5)])
-    return f'{dias}d'
-
 def plot_comparison(acao_returns, benchmark_returns):
     plt.figure(figsize=(12, 6))
     
@@ -35,66 +23,99 @@ def plot_comparison(acao_returns, benchmark_returns):
     plt.show()
 
 
-st.set_page_config(page_title='Análise de Carteira',
+st.set_page_config(page_title='Análise de Portfolio',
                     page_icon='📈',
                     layout='wide')
 
-st.title('Análise de Carteira')
+st.title('Análise de Portfolio')
 st.write('Em desenvolvimento')
 st.markdown('---')
 
-qs.extend_pandas()
-benchmark_dict = {'Ibovespa': '^BVSP', 
-                'CDI': 'CDI',
-                'Dólar': 'USDBRL=X'}
 
 benchmark_dict = {'Ibovespa': '^BVSP',
                 'Dólar': 'USDBRL=X'}
 
-periodo_dict = {'3 meses': '3mo',
-                '6 meses': '6mo',
-                '1 ano': '1y',
-                '2 anos': '2y',
-                '3 anos': '3y',
-                '5 anos': '5y',
-                'Desde início': 'max'}
+col1, col2, col3, col4 = st.columns([3, 2, 1, 1])
+with col1:
+    ativos = st.multiselect('Ativos da carteira', utils.lista_ativos_b3(), placeholder='Digite o nome da ação', key='carteira')
+    ativos = [i + '.SA' for i in ativos]
+with col2:
+    benchmarks = st.multiselect('Selecione o(s) Benchmark(s)', benchmark_dict.keys(), placeholder='Digite o nome do benchmark', key='benchmark_carteira')
+with col3:
+    aporte = st.number_input('Aporte inicial', min_value=0.00, value=10000.00, step=0.01, placeholder='Digite o valor')
+with col4:
+    data_ini = st.date_input('Data de início da análise', format='DD/MM/YYYY', value=(datetime.today() - timedelta(days=1)), max_value=(datetime.today() - timedelta(days=1)))
 
-
-ativos = st.multiselect('Ativos da carteira', utils.lista_ativos_b3(), placeholder='Digite o nome da ação', key='carteira')
-ativos = [i + '.SA' for i in ativos]
-
-benchmarks = st.multiselect('Selecione o(s) Benchmark(s)', benchmark_dict.keys(), key='benchmark_carteira')
-data_ini = st.date_input('Digite a data de início da análise', format='DD/MM/YYYY')
-#periodo = periodo_dict[st.selectbox('Selecione o período de análise', periodo_dict.keys(), key='periodo_carteira')]
-#retorno_benchmark = qs.utils.download_returns(benchmark, period=periodo)
     
+if not benchmarks or not ativos:
+    st.warning('Digite pelo menos 1 ação e 1 benchmark')
 
-precos = yf.download(ativos, start=data_ini)['Adj Close']
-precos['Carteira'] = precos.sum(axis = 1)
-retornos = precos/precos.iloc[0]
-retornos = retornos.dropna()
-carteira = retornos['Carteira']
-retornos = retornos.drop(['Carteira'], axis = 1)
-st.line_chart(retornos)
+else:
+    precos = yf.download(ativos, start=data_ini)['Adj Close'][:-1]
+    if precos.empty:
+        st.warning('Não há valores para a data selecionada, digite uma data diferente ou selecione outro ativo')
+    else:
+        if len(ativos) == 1:
+            precos = pd.DataFrame(precos)
+            retornos = precos/precos.iloc[0]
+            retornos = retornos.dropna()
+            carteira = retornos
+            carteira.rename(columns={'Adj Close': 'Carteira'}, inplace=True)
+        else:
+            precos['Carteira'] = precos.sum(axis = 1)
+            retornos = precos/precos.iloc[0]
+            retornos = retornos.dropna()
+            carteira = retornos['Carteira']
+            retornos = retornos.drop(['Carteira'], axis = 1)
 
-consolidado = pd.DataFrame()
+        st.markdown('### Gráfico dos retornos do(s) ativo(s) da carteira')
+        st.line_chart(retornos)
 
-for benchmark in benchmarks:
-    benchmark_ticker = benchmark_dict[benchmark]
-    precos_benchmark = yf.download(benchmark_ticker, start=data_ini)['Adj Close']
-    retornos_benchmark = precos_benchmark/precos_benchmark[0]
-    consolidado_benchmark = pd.merge(carteira, retornos_benchmark, how='inner', on='Date')
-    consolidado_benchmark.rename(columns={'Adj Close': benchmark}, inplace=True)
-    consolidado = pd.merge(consolidado, consolidado_benchmark, how='outer', left_index=True, right_index=True)
+        consolidado = pd.DataFrame()
 
-consolidado = consolidado.drop(columns=['Carteira_x', 'Carteira_y'], axis=1)
-consolidado = pd.merge(consolidado, carteira, how='outer', left_index=True, right_index=True)
-st.line_chart(consolidado)
+        for benchmark in benchmarks:
+            benchmark_ticker = benchmark_dict[benchmark]
+            precos_benchmark = yf.download(benchmark_ticker, start=data_ini)['Adj Close'][:-1]
+            retornos_benchmark = precos_benchmark/precos_benchmark[0]
+            consolidado_benchmark = pd.merge(carteira, retornos_benchmark, how='inner', on='Date')
+            consolidado_benchmark.rename(columns={'Adj Close': benchmark}, inplace=True)
+            consolidado = pd.merge(consolidado, consolidado_benchmark, how='outer', left_index=True, right_index=True)
+        
+        consolidado = pd.merge(consolidado, carteira, how='inner', left_index=True, right_index=True)
+        consolidado = consolidado.drop(columns=['Carteira_y'], axis=1)
+
+        if len(benchmarks) > 1:
+            consolidado = consolidado.drop(columns=['Carteira_x'], axis=1)  
+        else:
+            consolidado.rename(columns={'Carteira_x': 'Carteira'}, inplace=True)
+        
+        st.markdown('### Comparativo de retornos do(s) benchmark(s) com a carteira')
+        st.line_chart(consolidado)
+        
+        st.markdown('### Resumo do portfolio')
+        patrimonio = round(aporte * consolidado['Carteira'].iloc[-1], 2)
+        num_colunas = len(benchmarks) + 3
+        colunas = st.columns(num_colunas)
+        colunas[0].metric('Valor investido', 'R$ ' + str(aporte))
+        colunas[1].metric('Valor atual do portfolio', 'R$ ' + str(patrimonio))
+        colunas[2].metric('Retorno Carteira', str(round((consolidado['Carteira'].iloc[-1] - 1) * 100, 2)) + '%')
+
+        for i, benchmark in enumerate(benchmarks, start=3):
+            colunas[i].metric(f'Retorno {benchmark}', str(round((consolidado[benchmark].iloc[-1] - 1) * 100, 2)) + '%')
+
+        
+        
+        
+        
+        # Adicionar a opção de inserir a quantidade ações compradas pra cada ativo no dia 0 e calcular o valor aportado
+        # Inserir gráfico de pizza com o valor aportado em cada ativo
+        # Inserir dados fundamentalistas dos ativos em formato de gráfico de barras para comparar entre os ativos
+        # Inserir gráfico de correlação entre ativos
+        # Adicionar gráfico de barras com o retorno de cada ativo para comparar 
+        # Adicionar Alpha, Beta, Z-Score da carteira com o benchmark (se possível, também o gráfico)
+        # Inserir relatório quantstats como imagem da carteira com o benchmark
+        # Inserir análise de Markovitz para calcular os pesos ideais em cada ativo para obter o melhor retorno e o gráfico
 
 
 
-
-precos_primeiro_dia = precos.iloc[0]
-
-
-  
+        

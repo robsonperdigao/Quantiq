@@ -17,7 +17,7 @@ def main():
             #Section("Quantiq", '💲'),
             Page('pages/opcoes.py', 'Estratégias com Opções', '❇️'),
             Page('pages/comparador_rentabilidade.py', 'Comparador de Rentabilidade', '🏅'),
-            #Page('pages/quant/analise_portfolio.py', 'Análise de Carteira', '📈'),
+            Page('pages/quant/analise_portfolio.py', 'Análise de Portfolio', '📈'),
             #Page('pages/quant/analise_setorial.py', 'Análise Setorial', '🗄️'),
             #Page('pages/quant/algotrading.py', 'Algotrading/Robô Trader', '🗄️'),
             #Page('pages/quant/factor_investing.py', 'Factor Investing', '🗄️'),
