@@ -48,7 +48,7 @@ with col4:
 
     
 if not benchmarks or not ativos:
-    st.warning('Digite pelo menos 1 ação e 1 benchmark')
+    st.warning('Selecione pelo menos 1 ação e 1 benchmark')
 
 else:
     precos = yf.download(ativos, start=data_ini)['Adj Close'][:-1]
