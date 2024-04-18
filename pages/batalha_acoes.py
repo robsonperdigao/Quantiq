@@ -28,6 +28,8 @@ O ativo com o menor valor ganha um ponto.
 *Isso não é recomendação de investimentos*.""")
 
 setores = utils.lista_setores()
+setores.pop(20, None)
+setores.pop(31, None)
 setor = st.selectbox('Selecione o setor', setores.values(), placeholder='Digite ou selecione o setor')
 for key, value in setores.items():
     if setor == value:
