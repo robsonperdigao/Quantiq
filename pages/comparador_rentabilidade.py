@@ -61,8 +61,9 @@ st.set_page_config(page_title='Comparador de Rentabilidade',
 st.title('Comparador de Rentabilidade')
 st.markdown('---')
 
+with st.spinner('Carregando indicadores macro'):
+    selic_ano, cdi_ano, ipca_ano = utils.calcula_indicadores_macro()
 
-selic_ano, cdi_ano, ipca_ano = utils.calcula_indicadores_macro()
 with st.container():
     st.markdown('### Indicadores macro')
     col1, col2, col3 = st.columns(3)

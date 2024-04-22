@@ -8,19 +8,6 @@ import seaborn as sns
 import yfinance as yf
 
 
-def plot_comparison(acao_returns, benchmark_returns):
-    plt.figure(figsize=(12, 6))
-    
-    plt.plot(acao_returns.index, acao_returns.values, label='Ação')
-    plt.plot(benchmark_returns.index, benchmark_returns.values, label='Benchmark')
-    
-    plt.title('Comparação de Retornos Acumulados')
-    plt.xlabel('Data')
-    plt.ylabel('Retorno Acumulado')
-    plt.legend()
-    plt.show()
-
-
 st.set_page_config(page_title='Análise de Portfolio',
                     page_icon='📈',
                     layout='wide')
@@ -55,7 +42,6 @@ else:
     else:
         if len(ativos) == 1:
             precos = pd.DataFrame(precos)
-            #retornos = yf.download(ativos, start=data_ini, interval='1mo')['Adj Close'][:-1].pct_change()
             retornos = precos/precos.iloc[0]
             retornos = retornos.dropna()
             retorno_diário = retornos['Carteira'].pct_change()
