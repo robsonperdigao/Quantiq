@@ -44,43 +44,46 @@ st.set_page_config(page_title='Mapa de Fundos de Investimentos',
 st.title('Mapa de Fundos de Investimentos')
 st.markdown('---')
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    data = st.date_input('Selecione uma data', value=date.today(), format='DD/MM/YYYY')
-    ult_dia_ant = ultimo_dia_util_mes_anterior(data)
-    data_mes = ult_dia_ant.strftime('%Y%m%d').replace('-','')[:-2]
-    data_str = str(ult_dia_ant)
-    
-with col2:
-    qtd_fundos = st.slider('Quantidade de fundos para visualizar', min_value=1, max_value=100, value=15, step=1)
-    
-with col3:
-    nome_fundo = st.text_input('Pesquise pelo nome do fundo').upper()
-    
-    url = "http://dados.cvm.gov.br/dados/FI/CAD/DADOS/cad_fi.csv"
-    cadastral = pd.read_csv(url, sep = ';', encoding = 'ISO-8859-1')
+try:
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        data = st.date_input('Selecione uma data', value=date.today(), format='DD/MM/YYYY')
+        ult_dia_ant = ultimo_dia_util_mes_anterior(data)
+        data_mes = ult_dia_ant.strftime('%Y%m%d').replace('-','')[:-2]
+        data_str = str(ult_dia_ant)
+        
+    with col2:
+        qtd_fundos = st.slider('Quantidade de fundos para visualizar', min_value=1, max_value=100, value=15, step=1)
+        
+    with col3:
+        nome_fundo = st.text_input('Pesquise pelo nome do fundo').upper()
+        
+        url = "http://dados.cvm.gov.br/dados/FI/CAD/DADOS/cad_fi.csv"
+        cadastral = pd.read_csv(url, sep = ';', encoding = 'ISO-8859-1')
 
-    df_cadastral = cadastral.dropna(subset=['GESTOR', 'CLASSE_ANBIMA', 'CLASSE'])
-    
-    pl_fundos = df_cadastral[['DENOM_SOCIAL', 'VL_PATRIM_LIQ', 'CLASSE', 'PUBLICO_ALVO', 'TAXA_ADM', 'TAXA_PERFM', 'GESTOR', 'CNPJ_FUNDO', 'SIT']]
-    pl_fundos = pl_fundos[pl_fundos['SIT'] == 'EM FUNCIONAMENTO NORMAL']
-    pl_fundos = pl_fundos.sort_values('VL_PATRIM_LIQ', ascending=False).head(qtd_fundos)
+        df_cadastral = cadastral.dropna(subset=['GESTOR', 'CLASSE_ANBIMA', 'CLASSE'])
+        
+        pl_fundos = df_cadastral[['DENOM_SOCIAL', 'VL_PATRIM_LIQ', 'CLASSE', 'PUBLICO_ALVO', 'TAXA_ADM', 'TAXA_PERFM', 'GESTOR', 'CNPJ_FUNDO', 'SIT']]
+        pl_fundos = pl_fundos[pl_fundos['SIT'] == 'EM FUNCIONAMENTO NORMAL']
+        pl_fundos = pl_fundos.sort_values('VL_PATRIM_LIQ', ascending=False).head(qtd_fundos)
 
-tab1, tab2, tab3 = st.tabs(['Fundos com maior PL', 'Fundos filtrados por nome', 'Fundos filtrados por gestora'])
-with tab1:
-    st.write('Fundos com maior PL')
-    pl_fundos
-with tab2:
-    fundos_filtro_nome = df_cadastral[df_cadastral['DENOM_SOCIAL'].str.contains(nome_fundo)]
-    fundos_filtro_nome
-with tab3:
-    st.write('Fundos Filtrados por Gestora')
+    tab1, tab2, tab3 = st.tabs(['Fundos com maior PL', 'Fundos filtrados por nome', 'Fundos filtrados por gestora'])
+    with tab1:
+        st.write('Fundos com maior PL')
+        pl_fundos
+    with tab2:
+        fundos_filtro_nome = df_cadastral[df_cadastral['DENOM_SOCIAL'].str.contains(nome_fundo)]
+        fundos_filtro_nome
+    with tab3:
+        st.write('Fundos Filtrados por Gestora')
 
-    gestor = st.selectbox('Selecione a gestora', df_cadastral['GESTOR'].unique())
-    df_filtro_gestor = df_cadastral[df_cadastral['GESTOR'] == gestor]
-    classe = st.selectbox('Selecione a classe', df_filtro_gestor['CLASSE'].unique())
-    df_filtrado = df_filtro_gestor[df_filtro_gestor['CLASSE'] == classe]
+        gestor = st.selectbox('Selecione a gestora', df_cadastral['GESTOR'].unique())
+        df_filtro_gestor = df_cadastral[df_cadastral['GESTOR'] == gestor]
+        classe = st.selectbox('Selecione a classe', df_filtro_gestor['CLASSE'].unique())
+        df_filtrado = df_filtro_gestor[df_filtro_gestor['CLASSE'] == classe]
 
-    st.write("Fundos Disponíveis:")
-    st.dataframe(df_filtrado)
+        st.write("Fundos Disponíveis:")
+        st.dataframe(df_filtrado)
 
+except:
+    st.error('Ocorreu algum erro, tente atualizar ou alterar as informações para coleta.')

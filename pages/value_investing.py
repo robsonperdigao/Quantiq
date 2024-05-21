@@ -32,33 +32,39 @@ st.markdown('---')
 ativos = utils.lista_ativos_b3()
 ativo = st.selectbox('Selecione o ativo', ativos, index=123)
 
-dados_ativo = utils.fundamentos_ativo(ativo)
-dados_ativo = dados_ativo[['Cotacao', 'PL', 'PVP', 'LPA', 'VPA']]
-
-col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
-cotacao = float(dados_ativo['Cotacao'].iloc[0])
-pl_ativo = float(dados_ativo['PL'].iloc[0])
-pvp_ativo = float(dados_ativo['PVP'].iloc[0])
-lpa = float(dados_ativo['LPA'].iloc[0])
-vpa = float(dados_ativo['VPA'].iloc[0])
-indice_graham_ativo = round(pl_ativo * pvp_ativo, 2)
 try:
+    dados_ativo = utils.fundamentos_ativo(ativo)
+    dados_ativo = dados_ativo[['Cotacao', 'PL', 'PVP', 'LPA', 'VPA']]
+
+    col1, col2, col3, col4, col5, col6, col7 = st.columns(7)
+    cotacao = float(dados_ativo['Cotacao'].iloc[0])
+    pl_ativo = float(dados_ativo['PL'].iloc[0])
+    pvp_ativo = float(dados_ativo['PVP'].iloc[0])
+    lpa = float(dados_ativo['LPA'].iloc[0])
+    vpa = float(dados_ativo['VPA'].iloc[0])
+    indice_graham_ativo = round(pl_ativo * pvp_ativo, 2)
+
     valor_intrinseco = round((indice * lpa * vpa) ** (1 / 2), 2)
+
+
+    #if valor_intrinseco !=0 and cotacao !=0 and pl_ativo !=0 and pvp_ativo !=0 and lpa !=0 and vpa != 0:
+        #st.error('Não é possível calcular o Valor Intrínseco deste ativo, selecione outro.')
+
+
+    with col1:
+        st.metric(f'P/L de {ativo}', pl_ativo)
+    with col2:
+        st.metric(f'P/VP de {ativo}', pvp_ativo)
+    with col3:
+        st.metric(f'Índice de Graham de {ativo}', indice_graham_ativo)
+    with col4:
+        st.metric(f'LPA de {ativo}', f'R$ {lpa}')
+    with col5:
+        st.metric(f'VPA de {ativo}', f'R$ {vpa}')
+    with col6:
+        st.metric(f'Cotação atual de {ativo}', f'R$ {cotacao}')    
+    with col7:
+        st.metric(f'Valor Intrínseco de {ativo}', f'R$ {valor_intrinseco}', f'{(valor_intrinseco/cotacao-1)*100:.2f}%')
+
 except:
-    valor_intrinseco = 0
-
-with col1:
-    st.metric(f'P/L de {ativo}', pl_ativo)
-with col2:
-    st.metric(f'P/VP de {ativo}', pvp_ativo)
-with col3:
-    st.metric(f'Índice de Graham de {ativo}', indice_graham_ativo)
-with col4:
-    st.metric(f'LPA de {ativo}', f'R$ {lpa}')
-with col5:
-    st.metric(f'VPA de {ativo}', f'R$ {vpa}')
-with col6:
-    st.metric(f'Cotação atual de {ativo}', f'R$ {cotacao}')    
-with col7:
-    st.metric(f'Valor Intrínseco de {ativo}', f'R$ {valor_intrinseco}', f'{(valor_intrinseco/cotacao-1)*100:.2f}%')
-
+    st.error('Não foi possível obter os dados deste ativo, selecione outro.')

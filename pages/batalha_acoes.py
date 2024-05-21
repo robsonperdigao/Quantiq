@@ -70,3 +70,5 @@ with st.form('batalha'):
                 st.metric('🔴 Perdedor 🔴', perdedor)
                 st.metric('Pontos', pontos_perdedor)
         
+        # Adicionar opção de comparar os ativos que são financeiros (20 e 31)
+        # Precisa atualizar a função para fazer os cálculos diferentes

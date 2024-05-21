@@ -61,48 +61,52 @@ st.set_page_config(page_title='Comparador de Rentabilidade',
 st.title('Comparador de Rentabilidade')
 st.markdown('---')
 
-with st.spinner('Carregando indicadores macro'):
-    selic_ano, cdi_ano, ipca_ano = utils.calcula_indicadores_macro()
-
-with st.container():
-    st.markdown('### Indicadores macro')
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric('Selic Anual', f'{selic_ano:.2f}%')
-    with col2:
-        st.metric('CDI Anual', f'{cdi_ano:.2f}%')
-    with col3:
-        st.metric('IPCA Anual', f'{ipca_ano:.2f}%')
-st.markdown('---')
-
-with st.container():
-    st.markdown('### Informações dos ativos')
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        vlr = st.number_input('Valor da aplicação')
-    with col2:
-        prazo = st.number_input('Insira o prazo de vencimento (em meses)', step=1)
-
-with st.container():
-    col1, col2 = st.columns(2)
-    with col1:
-        with st.expander('Ativo 1', expanded=True):
-            ativo1, ativo1_vlr_liq_resg, ativo1_rent_liq = comparativo('ativo1')     
-    with col2:
-        with st.expander('Ativo 2', expanded=True):
-            ativo2, ativo2_vlr_liq_resg, ativo2_rent_liq = comparativo('ativo2')
+try:
+    with st.spinner('Carregando indicadores macro'):
         
-with st.container():
-    col1, col2, col3, col4 = st.columns(4)
-    if ativo1_vlr_liq_resg > ativo2_vlr_liq_resg:
+            selic_ano, cdi_ano, ipca_ano = utils.calcula_indicadores_macro()
+        
+    with st.container():
+        st.markdown('### Indicadores macro')
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric('Selic Anual', f'{selic_ano:.2f}%')
         with col2:
-            st.metric(f'O {ativo1} é mais rentável, a diferença no resgate é de:', f'R$ {ativo1_vlr_liq_resg - ativo2_vlr_liq_resg:.2f}', f'{(ativo1_vlr_liq_resg / ativo2_vlr_liq_resg - 1):.2f}%')
-        with col3: 
-            st.metric('Diferença na rentabilidade:', f'{ativo1_rent_liq - ativo2_rent_liq:.2f}%', f'{(ativo1_rent_liq / ativo2_rent_liq - 1):.2f}%')
-    else:
-        with col2:
-            st.metric(f'O {ativo2} é mais rentável, a diferença no resgate é de:', f'R$ {ativo2_vlr_liq_resg - ativo1_vlr_liq_resg:.2f}', f'{(ativo2_vlr_liq_resg / ativo1_vlr_liq_resg - 1):.2f}%')
-        with col3: 
-            st.metric('Diferença na rentabilidade:', f'{ativo2_rent_liq - ativo1_rent_liq:.2f}%', f'{(ativo2_rent_liq / ativo1_rent_liq - 1):.2f}%')
+            st.metric('CDI Anual', f'{cdi_ano:.2f}%')
+        with col3:
+            st.metric('IPCA Anual', f'{ipca_ano:.2f}%')
+    st.markdown('---')
 
+    with st.container():
+        st.markdown('### Informações dos ativos')
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            vlr = st.number_input('Valor da aplicação')
+        with col2:
+            prazo = st.number_input('Insira o prazo de vencimento (em meses)', step=1)
+
+    with st.container():
+        col1, col2 = st.columns(2)
+        with col1:
+            with st.expander('Ativo 1', expanded=True):
+                ativo1, ativo1_vlr_liq_resg, ativo1_rent_liq = comparativo('ativo1')     
+        with col2:
+            with st.expander('Ativo 2', expanded=True):
+                ativo2, ativo2_vlr_liq_resg, ativo2_rent_liq = comparativo('ativo2')
+            
+    with st.container():
+        col1, col2, col3, col4 = st.columns(4)
+        if ativo1_vlr_liq_resg > ativo2_vlr_liq_resg:
+            with col2:
+                st.metric(f'O {ativo1} é mais rentável, a diferença no resgate é de:', f'R$ {ativo1_vlr_liq_resg - ativo2_vlr_liq_resg:.2f}', f'{(ativo1_vlr_liq_resg / ativo2_vlr_liq_resg - 1):.2f}%')
+            with col3: 
+                st.metric('Diferença na rentabilidade:', f'{ativo1_rent_liq - ativo2_rent_liq:.2f}%', f'{(ativo1_rent_liq / ativo2_rent_liq - 1):.2f}%')
+        else:
+            with col2:
+                st.metric(f'O {ativo2} é mais rentável, a diferença no resgate é de:', f'R$ {ativo2_vlr_liq_resg - ativo1_vlr_liq_resg:.2f}', f'{(ativo2_vlr_liq_resg / ativo1_vlr_liq_resg - 1):.2f}%')
+            with col3: 
+                st.metric('Diferença na rentabilidade:', f'{ativo2_rent_liq - ativo1_rent_liq:.2f}%', f'{(ativo2_rent_liq / ativo1_rent_liq - 1):.2f}%')
+
+except:
+        st.error('Ocorreu um erro ao tentar carregar os indicadores, atualize a página')
 
